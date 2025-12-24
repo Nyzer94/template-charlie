@@ -3,475 +3,347 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{TITRE_DU_SITE}}</title>
-    <meta name="description" content="Portfolio Technique & Ingénierie">
+    <title>{{TITRE_DU_SITE}} // HUD SYS V.4</title>
+    <meta name="robots" content="noindex, nofollow">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
     <style>
         /* =========================================
-           1. VARIABLES (Thème "Plan Technique")
+           1. VARIABLES (Système Optique)
         ========================================= */
         :root {
-            --bg-paper: #F7F9FC;       /* Blanc cassé / Papier technique */
-            --grid-line: #E1E6EB;      /* Ligne de grille très légère */
-            --ink-color: #1A202C;      /* Noir texte principal */
-            --blueprint-blue: #0056D2; /* Bleu Ingénieur (Traits, Cadres) */
-            --technical-grey: #718096; /* Gris pour les métadonnées */
-            --alert-red: #E53E3E;      /* Pour les interactions importantes */
-            
-            --border-thick: 2px solid var(--blueprint-blue);
-            --border-thin: 1px solid var(--blueprint-blue);
+            --bg-space: #05080C;       /* Noir spatial */
+            --hud-cyan: #00F0FF;       /* Couleur primaire laser */
+            --hud-alert: #FF5F1F;      /* Orange alerte/focus */
+            --hud-dim: rgba(0, 240, 255, 0.3); /* Cyan atténué pour les lignes */
+            --scan-line: rgba(0, 240, 255, 0.03);
         }
 
         /* =========================================
-           2. RESET & BASE (Papier Millimétré)
+           2. BASE & EFFETS ÉCRAN
         ========================================= */
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; cursor: crosshair; /* Curseur viseur */ }
 
         body {
-            background-color: var(--bg-paper);
-            color: var(--ink-color);
-            font-family: 'Roboto Mono', monospace; /* Tout en mono par défaut */
-            line-height: 1.5;
-            padding: 40px;
-            
-            /* Motif Papier Millimétré */
-            background-image: 
-                linear-gradient(var(--grid-line) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-            background-size: 40px 40px;
-            min-height: 100vh;
-        }
-
-        h1, h2, h3 {
-            font-family: 'Oswald', sans-serif; /* Titres style "Plan" */
+            background-color: var(--bg-space);
+            color: var(--hud-cyan);
+            font-family: 'Share Tech Mono', monospace;
             text-transform: uppercase;
             letter-spacing: 1px;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 20px;
+            /* Léger effet de "Glow" sur tout le texte */
+            text-shadow: 0 0 5px var(--hud-dim);
         }
 
+        /* Effet de Scanlines (lignes TV) sur tout l'écran */
+        body::after {
+            content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: repeating-linear-gradient(0deg, var(--scan-line) 0px, var(--scan-line) 1px, transparent 1px, transparent 3px);
+            pointer-events: none; z-index: 999;
+        }
+
+        /* Conteneur principal avec cadre HUD */
+        .cockpit-view {
+            max-width: 1200px; margin: 0 auto;
+            border: 2px solid var(--hud-dim);
+            padding: 20px; position: relative;
+            /* Coins coupés (style militaire) */
+            clip-path: polygon(
+                0 20px, 20px 0, calc(100% - 20px) 0, 100% 20px, 
+                100% calc(100% - 20px), calc(100% - 20px) 100%, 20px 100%, 0 calc(100% - 20px)
+            );
+            background: rgba(0, 240, 255, 0.02);
+        }
+
+        /* Éléments de visée décoratifs aux coins */
+        .reticle { position: absolute; color: var(--hud-dim); font-weight: bold; }
+        .tl { top: 5px; left: 10px; } .tr { top: 5px; right: 10px; }
+        .bl { bottom: 5px; left: 10px; } .br { bottom: 5px; right: 10px; }
+
+        h1, h2, h3 { font-weight: 400; letter-spacing: 2px; }
         a { text-decoration: none; color: inherit; transition: 0.3s; }
-        ul { list-style: none; }
 
-        /* Le Cadre Principal (La "Feuille A0") */
-        .drawing-sheet {
-            max-width: 1100px;
-            margin: 0 auto;
-            border: var(--border-thick);
-            background: rgba(255, 255, 255, 0.9);
-            padding: 40px;
-            position: relative;
-            box-shadow: 10px 10px 0px rgba(0, 86, 210, 0.1); /* Ombre dure décalée */
-        }
-
-        /* Croix de visée aux 4 coins (Déco technique) */
-        .crosshair {
-            position: absolute;
-            width: 20px; height: 20px;
-            border-right: 1px solid var(--blueprint-blue);
-            border-bottom: 1px solid var(--blueprint-blue);
-        }
-        .tl { top: 10px; left: 10px; border:none; border-left:1px solid var(--blueprint-blue); border-top:1px solid var(--blueprint-blue); }
-        .tr { top: 10px; right: 10px; border:none; border-right:1px solid var(--blueprint-blue); border-top:1px solid var(--blueprint-blue); }
-        .bl { bottom: 10px; left: 10px; border:none; border-left:1px solid var(--blueprint-blue); border-bottom:1px solid var(--blueprint-blue); }
-        .br { bottom: 10px; right: 10px; } /* Default style */
+        /* Utilitaires */
+        .alert-text { color: var(--hud-alert); text-shadow: 0 0 5px rgba(255, 95, 31, 0.5); }
+        .data-label { font-size: 0.7rem; color: var(--hud-dim); margin-bottom: 5px; display: block; }
 
         /* =========================================
-           3. LE CARTOUCHE (Header style Title Block)
+           3. TOP HUD (Header)
         ========================================= */
         header {
-            border: var(--border-thick);
-            margin-bottom: 50px;
-            display: grid;
-            grid-template-columns: 3fr 1fr; /* Nom à gauche, Méta à droite */
+            display: flex; justify-content: space-between; align-items: flex-end;
+            border-bottom: 2px solid var(--hud-dim);
+            padding-bottom: 20px; margin-bottom: 40px;
+            position: relative;
         }
+        /* Fausse barre d'horizon */
+        header::after { content: '[ ALTITUDE: 35,000 FT // VELOCITY: MACH 1.2 ]'; position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); font-size: 0.7rem; background: var(--bg-space); padding: 0 10px; color: var(--hud-dim); }
 
-        .cartouche-main {
-            padding: 30px;
-            border-right: var(--border-thick);
-        }
+        .pilot-identity h1 { font-size: 2.5rem; margin-bottom: 5px; }
+        .pilot-status { font-size: 0.9rem; }
+        .status-indicator { display: inline-block; width: 10px; height: 10px; background: var(--hud-alert); margin-right: 8px; box-shadow: 0 0 8px var(--hud-alert); animation: pulse 2s infinite; }
 
-        .cartouche-meta {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .meta-box {
-            padding: 10px 15px;
-            border-bottom: var(--border-thin);
-            font-size: 0.75rem;
-            color: var(--technical-grey);
-        }
-        .meta-box:last-child { border-bottom: none; flex-grow: 1; display:flex; align-items:center; justify-content:center; }
-        .meta-box strong { display: block; color: var(--blueprint-blue); font-size: 0.85rem; }
-
-        h1 { font-size: 3rem; margin: 0; line-height: 1; color: var(--ink-color); }
-        .subtitle { color: var(--blueprint-blue); font-weight: 500; font-size: 1.2rem; margin-top: 5px; }
-        .school { margin-top: 15px; font-size: 0.9rem; color: var(--technical-grey); }
-
-        /* Bouton CV style "Tampon" */
-        .btn-stamp {
-            display: inline-block;
-            border: 2px solid var(--ink-color);
-            padding: 8px 20px;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-family: 'Oswald', sans-serif;
-            font-size: 0.9rem;
-        }
-        .btn-stamp:hover { background: var(--ink-color); color: #fff; }
+        .sys-info { text-align: right; font-size: 0.8rem; line-height: 1.4; color: var(--hud-dim); }
 
         /* =========================================
-           4. SPECIFICATIONS (Bio) & FORMATION
+           4. MAIN DISPLAY (Layout 2 colonnes)
         ========================================= */
-        .grid-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 50px;
+        .hud-grid {
+            display: grid; grid-template-columns: 1fr 2fr; gap: 40px;
             margin-bottom: 60px;
         }
 
-        .section-label {
-            font-size: 0.8rem;
-            color: var(--blueprint-blue);
-            border-bottom: 1px solid var(--blueprint-blue);
-            padding-bottom: 5px;
-            margin-bottom: 20px;
-            display: inline-block;
-            width: 100%;
-        }
-
-        /* Bio */
-        .bio-text { font-size: 1rem; color: #444; text-align: justify; }
-
-        /* Timeline Technique */
-        .tech-timeline { position: relative; border-left: 1px solid var(--grid-line); padding-left: 20px; }
-        
-        .timeline-node {
+        /* Colonne Gauche : Cible (Bio) */
+        .target-bio-box {
+            border: 1px solid var(--hud-dim); padding: 20px;
             position: relative;
-            margin-bottom: 30px;
         }
-        .timeline-node::before {
-            content: ''; position: absolute; left: -25px; top: 5px;
-            width: 9px; height: 9px; background: var(--bg-paper);
-            border: 2px solid var(--blueprint-blue); border-radius: 50%;
-        }
+        .bio-text { font-size: 0.9rem; line-height: 1.7; text-align: justify; }
 
-        .date-tag {
-            background: var(--blueprint-blue); color: white;
-            padding: 2px 6px; font-size: 0.7rem; font-weight: bold;
-            display: inline-block; margin-bottom: 5px;
-        }
-        .node-title { font-weight: 700; font-size: 1rem; }
-        .node-desc { font-size: 0.85rem; color: var(--technical-grey); margin-top: 5px; }
+        /* Faux systèmes (Compétences/Formation) */
+        .systems-check { margin-top: 30px; }
+        .sys-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; border-bottom: 1px dashed var(--hud-dim); padding-bottom: 4px; }
+        .sys-status { color: var(--hud-alert); }
 
         /* =========================================
-           5. PROJETS (Component View)
+           5. MISSION LOGS (Projets)
         ========================================= */
-        .projects-section { margin-top: 20px; }
-        
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
+        .sector-title { 
+            border-bottom: 2px solid var(--hud-cyan); padding-bottom: 10px; margin-bottom: 30px; font-size: 1.5rem;
+            display: flex; justify-content: space-between;
         }
+        .deco-coords { font-size: 0.7rem; align-self: flex-end; color: var(--hud-dim); }
 
-        /* Carte Projet style "Plan de pièce" */
-        .blueprint-card {
-            border: var(--border-thin);
-            background: #fff;
-            padding: 20px;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        /* Les coins techniques de la carte */
-        .blueprint-card::after {
-            content: ''; position: absolute; bottom: 0; right: 0;
-            width: 0; height: 0;
-            border-style: solid; border-width: 0 0 20px 20px;
-            border-color: transparent transparent var(--blueprint-blue) transparent;
+        .mission-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; }
+
+        /* Carte Projet style "Verrouillage Cible" */
+        .mission-card {
+            border: 1px solid var(--hud-cyan);
+            padding: 25px; position: relative;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.05) 0%, transparent 50%);
             transition: all 0.3s;
         }
-
-        .blueprint-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 10px 10px 0 rgba(0,0,0,0.05);
-            border-color: var(--blueprint-blue);
+        
+        /* Viseur au survol */
+        .mission-card:hover {
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+            border-color: var(--hud-alert);
         }
+        .mission-card:hover h3 { color: var(--hud-alert); }
+        .mission-card:hover .btn-engage { background: var(--hud-alert); color: var(--bg-space); border-color: var(--hud-alert); box-shadow: 0 0 15px var(--hud-alert); }
 
-        .card-header-line {
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px dashed var(--grid-line);
-            padding-bottom: 10px; margin-bottom: 15px;
-        }
-        .project-ref { font-size: 0.7rem; color: var(--technical-grey); }
-        .project-year { font-weight: bold; font-size: 0.8rem; }
+        /* Angles de visée sur la carte */
+        .mission-card::before, .mission-card::after { content: ''; position: absolute; width: 15px; height: 15px; border-color: var(--hud-cyan); transition: 0.3s; }
+        .mission-card::before { top: -2px; left: -2px; border-top: 2px solid; border-left: 2px solid; }
+        .mission-card::after { bottom: -2px; right: -2px; border-bottom: 2px solid; border-right: 2px solid; }
+        .mission-card:hover::before, .mission-card:hover::after { border-color: var(--hud-alert); }
 
-        .card-title {
-            font-family: 'Oswald', sans-serif;
-            font-size: 1.4rem;
-            margin-bottom: 10px;
-            color: var(--ink-color);
-        }
+        .mission-id { font-size: 0.8rem; color: var(--hud-dim); margin-bottom: 10px; }
+        .mission-card h3 { font-size: 1.3rem; margin-bottom: 15px; }
+        .mission-desc { font-size: 0.85rem; margin-bottom: 20px; color: #aaa; }
 
-        .dim-lines {
-            display: flex; gap: 10px; margin-top: 20px; font-size: 0.75rem;
-            color: var(--blueprint-blue);
+        .btn-engage {
+            display: inline-block; width: 100%; text-align: center;
+            border: 1px solid var(--hud-cyan); color: var(--hud-cyan);
+            padding: 12px; font-weight: bold; letter-spacing: 2px;
+            transition: 0.3s; position: relative; overflow: hidden;
         }
-        .dim-tag { border: 1px solid var(--blueprint-blue); padding: 2px 8px; }
 
         /* =========================================
-           6. MODALES (Style Feuille de Spécification)
+           6. FOOTER (Radio Comms)
+        ========================================= */
+        footer {
+            border-top: 2px solid var(--hud-dim); padding-top: 20px; margin-top: 60px;
+            display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--hud-dim);
+        }
+        .comms-channel span { color: var(--hud-cyan); }
+        footer a:hover { color: var(--hud-alert); }
+
+        /* =========================================
+           7. MODALES (Style Briefing Room)
         ========================================= */
         dialog {
-            width: 100%; max-width: 900px;
-            border: var(--border-thick);
-            padding: 0;
-            background: #fff;
-            inset: 0;
-            margin: auto;
-            box-shadow: 20px 20px 0 rgba(0,0,0,0.1);
+            width: 90%; max-width: 800px;
+            background: var(--bg-space); color: var(--hud-cyan);
+            border: 2px solid var(--hud-alert);
+            box-shadow: 0 0 30px rgba(255, 95, 31, 0.3);
+            padding: 0; inset: 0; margin: auto; /* Centrage */
+            font-family: 'Share Tech Mono', monospace; text-transform: uppercase;
         }
-        dialog::backdrop { background: rgba(255, 255, 255, 0.8); }
+        dialog::backdrop { background: rgba(0, 10, 20, 0.9); backdrop-filter: blur(5px); }
 
         .modal-header {
-            background: var(--blueprint-blue);
-            color: white;
-            padding: 15px 30px;
-            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 95, 31, 0.2); padding: 15px 25px;
+            border-bottom: 1px solid var(--hud-alert); display: flex; justify-content: space-between; align-items: center;
         }
-        .close-btn {
-            background: transparent; border: 1px solid white; color: white;
-            padding: 5px 12px; cursor: pointer; text-transform: uppercase; font-size: 0.8rem;
-        }
-        .close-btn:hover { background: white; color: var(--blueprint-blue); }
+        .close-btn { background: transparent; border: 1px solid var(--hud-alert); color: var(--hud-alert); padding: 5px 15px; cursor: pointer; font-family: inherit; }
+        .close-btn:hover { background: var(--hud-alert); color: var(--bg-space); }
 
-        .modal-content { padding: 40px; }
+        .modal-content { padding: 30px; max-height: 80vh; overflow-y: auto; }
+        .briefing-block { margin-bottom: 30px; border-left: 2px solid var(--hud-dim); padding-left: 20px; }
+        .briefing-title { color: var(--hud-alert); margin-bottom: 10px; }
+        .btn-data { border: 1px solid var(--hud-cyan); color: var(--hud-cyan); padding: 8px 20px; display: inline-block; margin-top: 15px; }
+        .btn-data:hover { background: var(--hud-cyan); color: var(--bg-space); box-shadow: 0 0 15px var(--hud-cyan); }
 
-        /* Liste Projets dans Modale */
-        .spec-sheet {
-            display: grid; grid-template-columns: 1fr; gap: 40px;
-        }
-        
-        .project-detail-row {
-            display: grid; grid-template-columns: 1fr 2fr; gap: 30px;
-            border-bottom: 1px solid var(--grid-line); padding-bottom: 30px;
-        }
-
-        .detail-meta h4 { font-family: 'Oswald'; font-size: 1.5rem; margin-bottom: 10px; }
-        .detail-meta ul { font-size: 0.85rem; color: var(--technical-grey); }
-        .detail-desc { font-size: 0.95rem; line-height: 1.6; }
-        
-        .btn-pdf {
-            display: inline-block; margin-top: 15px;
-            background: var(--ink-color); color: white;
-            padding: 10px 20px; font-size: 0.8rem;
-        }
-        .btn-pdf:hover { background: var(--blueprint-blue); }
-
-        /* Footer */
-        footer {
-            margin-top: 60px;
-            border-top: var(--border-thick);
-            padding-top: 20px;
-            display: flex; justify-content: space-between;
-            font-size: 0.75rem; color: var(--technical-grey);
-            text-transform: uppercase;
-        }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
         @media (max-width: 768px) {
-            body { padding: 10px; }
-            .drawing-sheet { padding: 20px; }
-            header { grid-template-columns: 1fr; border-bottom: none; }
-            .cartouche-main { border-right: none; border-bottom: var(--border-thick); }
-            .grid-layout { grid-template-columns: 1fr; }
-            .project-detail-row { grid-template-columns: 1fr; }
+            .hud-grid { grid-template-columns: 1fr; }
+            header { flex-direction: column; align-items: flex-start; gap: 20px; }
+            .sys-info { text-align: left; }
+            .cockpit-view { clip-path: none; border: 1px solid var(--hud-dim); } /* Simplification mobile */
         }
-
     </style>
 </head>
 <body>
 
-    <main class="drawing-sheet">
-        <div class="crosshair tl"></div>
-        <div class="crosshair tr"></div>
-        <div class="crosshair bl"></div>
-        <div class="crosshair br"></div>
+    <main class="cockpit-view">
+        <div class="reticle tl">+ [TL-CAM]</div>
+        <div class="reticle tr">[TR-CAM] +</div>
+        <div class="reticle bl">+ [BL-DATA]</div>
+        <div class="reticle br">[BR-DATA] +</div>
 
         <header>
-            <div class="cartouche-main">
-                <h1>{{NOM}} {{PRENOM}}</h1>
-                <p class="subtitle">{{TITRE_PROFIL}}</p>
-                <p class="school">{{ECOLE_ACTUELLE}}</p>
-            </div>
-            <div class="cartouche-meta">
-                <div class="meta-box"><strong>ÉCHELLE</strong>1:1</div>
-                <div class="meta-box"><strong>DATE</strong>2024-2025</div>
-                <div class="meta-box"><strong>TYPE</strong>PORTFOLIO</div>
-                <div class="meta-box">
-                    <a href="#" class="btn-stamp">VOIR CV (PDF)</a>
+            <div class="pilot-identity">
+                <span class="data-label">// PILOT IDENTIFICATION</span>
+                <h1>{{PRENOM}} {{NOM}}</h1>
+                <div class="pilot-status">
+                    <span class="status-indicator"></span>
+                    STATUS: <span class="alert-text">ACTIVE // SEEKING OPPORTUNITIES</span>
                 </div>
+            </div>
+            <div class="sys-info">
+                [ ROLE: {{TITRE_PROFIL}} ]<br>
+                [ BASE: {{ECOLE_ACTUELLE}} ]<br>
+                [ SYS TIME: <span id="sys-time"></span> ]
             </div>
         </header>
 
-        <div class="grid-layout">
-            
-            <section id="specs">
-                <span class="section-label">01. SPÉCIFICATIONS TECHNIQUES (BIO)</span>
-                <p class="bio-text">
-                    {{DESCRIPTION_PROFIL}}
-                </p>
-                
-                <div style="margin-top: 30px;">
-                    <span class="section-label" style="width: auto;">CONTACT</span>
-                    <ul style="font-size: 0.9rem;">
-                        <li>// MAIL : <a href="mailto:{{EMAIL}}" style="text-decoration: underline;">{{EMAIL}}</a></li>
-                        <li>// LINKEDIN : <a href="{{LINKEDIN_URL}}" target="_blank" style="text-decoration: underline;">Profil</a></li>
-                    </ul>
+        <div class="hud-grid">
+            <section>
+                <div class="target-bio-box">
+                    <span class="data-label">// BIOMETRIC DATA & OBJECTIVES</span>
+                    <p class="bio-text">
+                        >> {{DESCRIPTION_PROFIL}}
+                    </p>
+                </div>
+
+                <div class="systems-check">
+                    <span class="data-label">// SYSTEMS DIAGNOSTIC (FORMATION)</span>
+                    <div class="sys-row">
+                        <span>MASTER ENG. (2025)</span> <span class="sys-status">[IN PROGRESS]</span>
+                    </div>
+                    <div class="sys-row">
+                        <span>CPGE MPSI/PSI</span> <span style="color: var(--hud-cyan);">[COMPLETED]</span>
+                    </div>
+                    <span class="data-label" style="margin-top: 20px;">// MODULES LOADED</span>
+                    <div style="font-size: 0.8rem;">AERODYNAMICS, PROPULSION, AVIONICS, C++</div>
                 </div>
             </section>
 
-            <section id="assembly">
-                <span class="section-label">02. PROCESSUS D'ASSEMBLAGE (FORMATION)</span>
+            <section>
+                <div class="sector-title">
+                    ACTIVE MISSIONS (PROJETS)
+                    <span class="deco-coords">COORDS: 48.8566° N, 2.3522° E</span>
+                </div>
                 
-                <div class="tech-timeline">
-                    <div class="timeline-node">
-                        <span class="date-tag">2023 - 2025</span>
-                        <div class="node-title">Master Ingénierie Mécanique</div>
-                        <div class="node-desc">
-                            INSA Lyon<br>
-                            <em>Spécialité : Conception de systèmes & Matériaux</em>
-                        </div>
-                    </div>
-                    <div class="timeline-node">
-                        <span class="date-tag">2020 - 2023</span>
-                        <div class="node-title">CPGE (MPSI / PSI)</div>
-                        <div class="node-desc">
-                            Lycée Pierre de Fermat<br>
-                            <em>Classe préparatoire aux grandes écoles</em>
-                        </div>
-                    </div>
+                <div class="mission-grid">
+                    
+                    <article class="mission-card" onclick="openModal('modal-projects')">
+                        <div class="mission-id">[ MISSION ID: ACAD-001 ]</div>
+                        <h3>CONCEPTION DRONE SUPERS.</h3>
+                        <p class="mission-desc">
+                            Design aérodynamique et simulation CFD d'un drone supersonique. Analyse de la traînée et des ondes de choc.
+                        </p>
+                        <div class="btn-engage">ENGAGE MISSION VIEWER >></div>
+                    </article>
+
+                    <article class="mission-card" onclick="openModal('modal-others')">
+                        <div class="mission-id">[ MISSION ID: SIDE-OPS-04 ]</div>
+                        <h3>{{TITRE_AUTRE_CATEGORIE}}</h3>
+                        <p class="mission-desc">
+                            Opérations secondaires : Projets personnels, Hackathons, Expériences associatives.
+                        </p>
+                        <div class="btn-engage">ACCESS ARCHIVES >></div>
+                    </article>
+
                 </div>
             </section>
         </div>
 
-        <section class="projects-section">
-            <span class="section-label">03. VUES ÉCLATÉES (PROJETS)</span>
-            
-            <div class="projects-grid">
-                
-                <article class="blueprint-card" onclick="openModal('modal-projects')">
-                    <div class="card-header-line">
-                        <span class="project-ref">REF-001</span>
-                        <span class="project-year">2024</span>
-                    </div>
-                    <h3 class="card-title">PROJETS ACADÉMIQUES</h3>
-                    <p style="font-size: 0.9rem; color: #555;">
-                        Conception mécanique, simulations par éléments finis et études de cas.
-                    </p>
-                    <div class="dim-lines">
-                        <span class="dim-tag">CATIA V5</span>
-                        <span class="dim-tag">ANSYS</span>
-                    </div>
-                </article>
-
-                <article class="blueprint-card" onclick="openModal('modal-others')">
-                    <div class="card-header-line">
-                        <span class="project-ref">REF-002</span>
-                        <span class="project-year">2023-24</span>
-                    </div>
-                    <h3 class="card-title">{{TITRE_AUTRE_CATEGORIE}}</h3>
-                    <p style="font-size: 0.9rem; color: #555;">
-                        Travaux pratiques, projets personnels et expériences annexes.
-                    </p>
-                    <div class="dim-lines">
-                        <span class="dim-tag">LABO</span>
-                        <span class="dim-tag">PERSO</span>
-                    </div>
-                </article>
-
-            </div>
-        </section>
-
         <footer>
-            <div>APPROUVÉ PAR : {{NOM}}</div>
-            <div><a href="mentions.html">MENTIONS LÉGALES</a></div>
-            <div>STATUS: FABRICATION TERMINÉE</div>
+            <div class="comms-channel">
+                [ COMMS CHANNEL ] <br> 
+                FREQ: <span><a href="mailto:{{EMAIL}}">{{EMAIL}}</a></span>
+            </div>
+            <div>
+                <a href="{{LINKEDIN_URL}}" target="_blank">[ ESTABLISH UPLINK (LINKEDIN) ]</a>
+            </div>
+            <div>
+                <a href="mentions.html">[ LEGAL PROTOCOLS ]</a>
+            </div>
         </footer>
 
     </main>
 
-
     <dialog id="modal-projects">
         <div class="modal-header">
-            <span>DOSSIER TECHNIQUE : PROJETS</span>
-            <button class="close-btn" onclick="closeModal('modal-projects')">FERMER [X]</button>
+            <span>>> MISSION BRIEFING: ACAD-001</span>
+            <button class="close-btn" onclick="closeModal('modal-projects')">TERMINATE [X]</button>
         </div>
         <div class="modal-content">
-            <div class="spec-sheet">
-                
-                <div class="project-detail-row">
-                    <div class="detail-meta">
-                        <h4>Moteur Hybride</h4>
-                        <ul>
-                            <li><strong>ANNÉE :</strong> 2024</li>
-                            <li><strong>OUTILS :</strong> SolidWorks, Matlab</li>
-                        </ul>
-                    </div>
-                    <div class="detail-desc">
-                        <p>Étude thermodynamique et conception 3D d'un système de motorisation hybride pour drone longue portée. Simulation des flux thermiques et optimisation de la masse structurelle.</p>
-                        <a href="#" class="btn-pdf">VOIR LE PLAN (PDF)</a>
-                    </div>
-                </div>
-
-                <div class="project-detail-row">
-                    <div class="detail-meta">
-                        <h4>Pont Suspendu (Maquette)</h4>
-                        <ul>
-                            <li><strong>ANNÉE :</strong> 2023</li>
-                            <li><strong>OUTILS :</strong> AutoCAD</li>
-                        </ul>
-                    </div>
-                    <div class="detail-desc">
-                        <p>Calcul de résistance des matériaux (RDM) et réalisation d'une maquette à l'échelle 1:50 pour tester la résistance aux vents latéraux.</p>
-                        <a href="#" class="btn-pdf">VOIR LE PLAN (PDF)</a>
-                    </div>
-                </div>
-
+            
+            <div class="briefing-block">
+                <h4 class="briefing-title">OBJECTIVE: DRONE SUPERSONIQUE</h4>
+                <p style="margin-bottom: 10px;">[YEAR: 2024] // [TOOLS: ANSYS FLUENT, CATIA]</p>
+                <p>
+                    Analyse complète des performances d'un concept de drone en régime supersonique (Mach 1.5). 
+                    Optimisation de la forme pour réduire le bang supersonique.
+                </p>
+                <a href="#" class="btn-data">[ DOWNLOAD TECHNICAL REPORT ]</a>
             </div>
+
+             <div class="briefing-block">
+                <h4 class="briefing-title">OBJECTIVE: SYSTÈME EMBARQUÉ</h4>
+                <p style="margin-bottom: 10px;">[YEAR: 2023] // [TOOLS: C++, STM32]</p>
+                <p>
+                    Développement du pilote automatique d'un mini-drone. Codage des boucles d'asservissement PID.
+                </p>
+            </div>
+
         </div>
     </dialog>
 
     <dialog id="modal-others">
         <div class="modal-header">
-            <span>DOSSIER ANNEXE : {{TITRE_AUTRE_CATEGORIE}}</span>
-            <button class="close-btn" onclick="closeModal('modal-others')">FERMER [X]</button>
+            <span>>> ARCHIVE ACCESS</span>
+            <button class="close-btn" onclick="closeModal('modal-others')">TERMINATE [X]</button>
         </div>
         <div class="modal-content">
-            <p>Contenu de la catégorie secondaire...</p>
+            <p>[ DATA RESTRICTED ] Contenu de la catégorie secondaire...</p>
         </div>
     </dialog>
 
     <script>
-        function openModal(id) {
-            document.getElementById(id).showModal();
-            document.body.style.overflow = 'hidden';
+        // Script pour l'heure système (effet temps réel)
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toISOString().substr(11, 8);
+            document.getElementById('sys-time').textContent = timeString + ' ZULU';
         }
-        function closeModal(id) {
-            document.getElementById(id).close();
-            document.body.style.overflow = '';
-        }
+        setInterval(updateTime, 1000); updateTime();
+
+        // Modales
+        function openModal(id) { document.getElementById(id).showModal(); }
+        function closeModal(id) { document.getElementById(id).close(); }
         document.querySelectorAll('dialog').forEach(d => {
-            d.addEventListener('click', e => {
-                if (e.target === d) {
-                    d.close();
-                    document.body.style.overflow = '';
-                }
-            });
+            d.addEventListener('click', e => { if (e.target === d) d.close(); });
         });
     </script>
 
