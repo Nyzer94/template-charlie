@@ -3,349 +3,425 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{TITRE_DU_SITE}} // HUD SYS V.4</title>
-    <meta name="robots" content="noindex, nofollow">
+    <title>{{TITRE_DU_SITE}} // FLIGHT DECK</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=B612+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
         /* =========================================
-           1. VARIABLES (Système Optique)
+           1. VARIABLES (Standard Avionique)
         ========================================= */
         :root {
-            --bg-space: #05080C;       /* Noir spatial */
-            --hud-cyan: #00F0FF;       /* Couleur primaire laser */
-            --hud-alert: #FF5F1F;      /* Orange alerte/focus */
-            --hud-dim: rgba(0, 240, 255, 0.3); /* Cyan atténué pour les lignes */
-            --scan-line: rgba(0, 240, 255, 0.03);
+            /* Matériaux */
+            --panel-grey: #363636;     /* Gris Panneau Cockpit */
+            --screen-bg: #000000;      /* Fond écran éteint */
+            --bezel-dark: #1a1a1a;     /* Contour écran */
+            
+            /* Couleurs Instruments */
+            --sky-blue: #0078D7;       /* Horizon Ciel */
+            --gnd-brown: #8B4513;      /* Horizon Sol */
+            --text-green: #00FF00;     /* Info standard (Airbus Green) */
+            --text-cyan: #00FFFF;      /* Valeurs */
+            --text-amber: #FFAA00;     /* Caution / Warning */
+            --text-white: #FFFFFF;
+            
+            /* Vis (Déco) */
+            --screw-color: #111;
         }
 
         /* =========================================
-           2. BASE & EFFETS ÉCRAN
+           2. STRUCTURE PANNEAU
         ========================================= */
-        * { box-sizing: border-box; margin: 0; padding: 0; cursor: crosshair; /* Curseur viseur */ }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background-color: var(--bg-space);
-            color: var(--hud-cyan);
-            font-family: 'Share Tech Mono', monospace;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            min-height: 100vh;
-            overflow-x: hidden;
+            background-color: #111; /* Fond cabine sombre */
+            color: var(--text-white);
+            font-family: 'B612 Mono', monospace;
             padding: 20px;
-            /* Léger effet de "Glow" sur tout le texte */
-            text-shadow: 0 0 5px var(--hud-dim);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* Effet de Scanlines (lignes TV) sur tout l'écran */
-        body::after {
-            content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: repeating-linear-gradient(0deg, var(--scan-line) 0px, var(--scan-line) 1px, transparent 1px, transparent 3px);
-            pointer-events: none; z-index: 999;
-        }
-
-        /* Conteneur principal avec cadre HUD */
-        .cockpit-view {
-            max-width: 1200px; margin: 0 auto;
-            border: 2px solid var(--hud-dim);
-            padding: 20px; position: relative;
-            /* Coins coupés (style militaire) */
-            clip-path: polygon(
-                0 20px, 20px 0, calc(100% - 20px) 0, 100% 20px, 
-                100% calc(100% - 20px), calc(100% - 20px) 100%, 20px 100%, 0 calc(100% - 20px)
-            );
-            background: rgba(0, 240, 255, 0.02);
-        }
-
-        /* Éléments de visée décoratifs aux coins */
-        .reticle { position: absolute; color: var(--hud-dim); font-weight: bold; }
-        .tl { top: 5px; left: 10px; } .tr { top: 5px; right: 10px; }
-        .bl { bottom: 5px; left: 10px; } .br { bottom: 5px; right: 10px; }
-
-        h1, h2, h3 { font-weight: 400; letter-spacing: 2px; }
-        a { text-decoration: none; color: inherit; transition: 0.3s; }
-
-        /* Utilitaires */
-        .alert-text { color: var(--hud-alert); text-shadow: 0 0 5px rgba(255, 95, 31, 0.5); }
-        .data-label { font-size: 0.7rem; color: var(--hud-dim); margin-bottom: 5px; display: block; }
-
-        /* =========================================
-           3. TOP HUD (Header)
-        ========================================= */
-        header {
-            display: flex; justify-content: space-between; align-items: flex-end;
-            border-bottom: 2px solid var(--hud-dim);
-            padding-bottom: 20px; margin-bottom: 40px;
+        /* Le Tableau de Bord Principal */
+        .instrument-panel {
+            background-color: var(--panel-grey);
+            border: 4px solid #222;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 1200px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1.5fr; /* PFD à gauche, ND/EICAS à droite */
+            gap: 30px;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
             position: relative;
         }
-        /* Fausse barre d'horizon */
-        header::after { content: '[ ALTITUDE: 35,000 FT // VELOCITY: MACH 1.2 ]'; position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); font-size: 0.7rem; background: var(--bg-space); padding: 0 10px; color: var(--hud-dim); }
 
-        .pilot-identity h1 { font-size: 2.5rem; margin-bottom: 5px; }
-        .pilot-status { font-size: 0.9rem; }
-        .status-indicator { display: inline-block; width: 10px; height: 10px; background: var(--hud-alert); margin-right: 8px; box-shadow: 0 0 8px var(--hud-alert); animation: pulse 2s infinite; }
-
-        .sys-info { text-align: right; font-size: 0.8rem; line-height: 1.4; color: var(--hud-dim); }
-
-        /* =========================================
-           4. MAIN DISPLAY (Layout 2 colonnes)
-        ========================================= */
-        .hud-grid {
-            display: grid; grid-template-columns: 1fr 2fr; gap: 40px;
-            margin-bottom: 60px;
+        /* Effet de texture "Plastique Granuleux" sur le panneau */
+        .instrument-panel::before {
+            content: ""; position: absolute; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+            pointer-events: none;
+            opacity: 0.4;
         }
 
-        /* Colonne Gauche : Cible (Bio) */
-        .target-bio-box {
-            border: 1px solid var(--hud-dim); padding: 20px;
+        /* =========================================
+           3. UNITÉS D'AFFICHAGE (Écrans)
+        ========================================= */
+        .mfd-unit {
+            background-color: var(--bezel-dark);
+            border-radius: 15px;
+            padding: 20px; /* Épaisseur du cadre plastique */
+            box-shadow: 
+                5px 5px 10px rgba(0,0,0,0.5), 
+                inset 2px 2px 5px rgba(255,255,255,0.1);
             position: relative;
+            display: flex;
+            flex-direction: column;
         }
-        .bio-text { font-size: 0.9rem; line-height: 1.7; text-align: justify; }
 
-        /* Faux systèmes (Compétences/Formation) */
-        .systems-check { margin-top: 30px; }
-        .sys-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; border-bottom: 1px dashed var(--hud-dim); padding-bottom: 4px; }
-        .sys-status { color: var(--hud-alert); }
-
-        /* =========================================
-           5. MISSION LOGS (Projets)
-        ========================================= */
-        .sector-title { 
-            border-bottom: 2px solid var(--hud-cyan); padding-bottom: 10px; margin-bottom: 30px; font-size: 1.5rem;
-            display: flex; justify-content: space-between;
+        /* Les 4 vis aux coins */
+        .screw {
+            position: absolute; width: 12px; height: 12px;
+            background: radial-gradient(circle at 30% 30%, #555, #000);
+            border-radius: 50%;
+            box-shadow: inset 1px 1px 2px black;
         }
-        .deco-coords { font-size: 0.7rem; align-self: flex-end; color: var(--hud-dim); }
+        .screw::after { content: "+"; position: absolute; top: -3px; left: 1px; color: #222; font-size: 14px; transform: rotate(45deg); }
+        .tl { top: 8px; left: 8px; } .tr { top: 8px; right: 8px; }
+        .bl { bottom: 8px; left: 8px; } .br { bottom: 8px; right: 8px; }
 
-        .mission-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; }
-
-        /* Carte Projet style "Verrouillage Cible" */
-        .mission-card {
-            border: 1px solid var(--hud-cyan);
-            padding: 25px; position: relative;
-            background: linear-gradient(135deg, rgba(0, 240, 255, 0.05) 0%, transparent 50%);
-            transition: all 0.3s;
+        /* L'écran en verre lui-même */
+        .glass-screen {
+            background-color: var(--screen-bg);
+            border: 2px solid #444;
+            border-radius: 4px;
+            flex-grow: 1;
+            padding: 15px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.9); /* Effet renfoncé */
+            overflow: hidden;
+            position: relative;
         }
         
-        /* Viseur au survol */
-        .mission-card:hover {
-            background: rgba(0, 240, 255, 0.1);
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
-            border-color: var(--hud-alert);
+        /* Reflet sur l'écran */
+        .glass-screen::after {
+            content: ""; position: absolute; top: 0; right: 0; width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.03));
+            pointer-events: none;
         }
-        .mission-card:hover h3 { color: var(--hud-alert); }
-        .mission-card:hover .btn-engage { background: var(--hud-alert); color: var(--bg-space); border-color: var(--hud-alert); box-shadow: 0 0 15px var(--hud-alert); }
 
-        /* Angles de visée sur la carte */
-        .mission-card::before, .mission-card::after { content: ''; position: absolute; width: 15px; height: 15px; border-color: var(--hud-cyan); transition: 0.3s; }
-        .mission-card::before { top: -2px; left: -2px; border-top: 2px solid; border-left: 2px solid; }
-        .mission-card::after { bottom: -2px; right: -2px; border-bottom: 2px solid; border-right: 2px solid; }
-        .mission-card:hover::before, .mission-card:hover::after { border-color: var(--hud-alert); }
-
-        .mission-id { font-size: 0.8rem; color: var(--hud-dim); margin-bottom: 10px; }
-        .mission-card h3 { font-size: 1.3rem; margin-bottom: 15px; }
-        .mission-desc { font-size: 0.85rem; margin-bottom: 20px; color: #aaa; }
-
-        .btn-engage {
-            display: inline-block; width: 100%; text-align: center;
-            border: 1px solid var(--hud-cyan); color: var(--hud-cyan);
-            padding: 12px; font-weight: bold; letter-spacing: 2px;
-            transition: 0.3s; position: relative; overflow: hidden;
-        }
+        h2 { font-size: 0.9rem; color: var(--text-white); margin-bottom: 10px; text-transform: uppercase; border-bottom: 1px solid #555; padding-bottom: 5px; }
 
         /* =========================================
-           6. FOOTER (Radio Comms)
+           4. CONTENU : PFD (Primary Flight Display) - BIO
         ========================================= */
-        footer {
-            border-top: 2px solid var(--hud-dim); padding-top: 20px; margin-top: 60px;
-            display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--hud-dim);
+        /* Horizon Artificiel (Background stylisé) */
+        .attitude-indicator {
+            position: absolute; top: 20%; left: 20%; width: 60%; height: 40%;
+            background: linear-gradient(to bottom, var(--sky-blue) 50%, var(--gnd-brown) 50%);
+            border: 1px solid white;
+            opacity: 0.3; z-index: 0;
         }
-        .comms-channel span { color: var(--hud-cyan); }
-        footer a:hover { color: var(--hud-alert); }
+        .attitude-indicator::before {
+            content: ""; position: absolute; top: 50%; left: 10%; width: 80%; height: 1px; background: yellow; box-shadow: 0 0 5px yellow;
+        }
+
+        .pfd-content { position: relative; z-index: 1; }
+        
+        .flight-mode {
+            display: flex; justify-content: space-between; font-weight: bold; font-size: 1rem; color: var(--text-green); margin-bottom: 20px;
+        }
+        .mode-box { border: 1px solid var(--text-white); padding: 2px 5px; }
+
+        .param-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; }
+        .param-label { color: var(--text-cyan); }
+        .param-val { color: var(--text-green); }
+
+        .speed-tape {
+            position: absolute; left: 0; top: 20%; bottom: 20%; width: 40px;
+            border-right: 1px solid white; background: rgba(0,0,0,0.5);
+            font-size: 0.8rem; text-align: right; padding-right: 5px; color: white;
+            display: flex; flex-direction: column; justify-content: space-around;
+        }
+        
+        .alt-tape {
+            position: absolute; right: 0; top: 20%; bottom: 20%; width: 50px;
+            border-left: 1px solid white; background: rgba(0,0,0,0.5);
+            font-size: 0.8rem; text-align: left; padding-left: 5px; color: white;
+            display: flex; flex-direction: column; justify-content: space-around;
+        }
 
         /* =========================================
-           7. MODALES (Style Briefing Room)
+           5. CONTENU : EICAS (Engine/Status) - PROJETS
+        ========================================= */
+        .eicas-grid {
+            display: grid; grid-template-columns: 1fr; gap: 10px;
+        }
+
+        .cas-message {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #111;
+            border: 1px solid #333;
+            padding: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .cas-message:hover { background: #222; border-color: var(--text-cyan); }
+        
+        .msg-title { color: var(--text-white); font-weight: bold; }
+        .msg-status { color: var(--text-amber); font-size: 0.8rem; }
+        .msg-desc { color: var(--text-green); font-size: 0.75rem; margin-top: 4px; display: block;}
+
+        .checklist-btn {
+            margin-top: 20px;
+            background: #222; border: 1px solid var(--text-cyan);
+            color: var(--text-cyan); padding: 10px; width: 100%;
+            text-align: center; cursor: pointer; text-transform: uppercase;
+        }
+        .checklist-btn:hover { background: var(--text-cyan); color: black; }
+
+        /* =========================================
+           6. FOOTER (MCDU / Control Unit)
+        ========================================= */
+        .mcdu-panel {
+            margin-top: 30px;
+            grid-column: span 2;
+            border-top: 2px solid #222;
+            padding-top: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* Boutons Physiques */
+        .phys-btn {
+            background: #1a1a1a;
+            color: #ccc;
+            border: 2px solid;
+            border-color: #444 #111 #111 #444; /* Effet 3D bouton */
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 2px 2px 5px black;
+        }
+        .phys-btn:active {
+            border-color: #111 #444 #444 #111; /* Enfoncé */
+            transform: translateY(2px);
+        }
+        
+        /* Master Warning */
+        .master-warn {
+            background: #500; color: #300;
+            border: 2px solid #300; padding: 10px 20px;
+            font-weight: bold; border-radius: 4px;
+            text-align: center;
+        }
+        .master-warn.active {
+            background: #ff0000; color: white;
+            box-shadow: 0 0 15px #ff0000;
+            animation: blink 0.5s infinite;
+        }
+
+        /* =========================================
+           7. MODALES (Checklist Style)
         ========================================= */
         dialog {
-            width: 90%; max-width: 800px;
-            background: var(--bg-space); color: var(--hud-cyan);
-            border: 2px solid var(--hud-alert);
-            box-shadow: 0 0 30px rgba(255, 95, 31, 0.3);
-            padding: 0; inset: 0; margin: auto; /* Centrage */
-            font-family: 'Share Tech Mono', monospace; text-transform: uppercase;
+            inset: 0; margin: auto; /* Centrage forcé */
+            background: #151515;
+            border: 2px solid var(--text-cyan);
+            color: var(--text-white);
+            width: 80%; max-width: 700px;
+            padding: 0;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            font-family: 'B612 Mono', monospace;
         }
-        dialog::backdrop { background: rgba(0, 10, 20, 0.9); backdrop-filter: blur(5px); }
+        dialog::backdrop { background: rgba(0,0,0,0.6); }
 
-        .modal-header {
-            background: rgba(255, 95, 31, 0.2); padding: 15px 25px;
-            border-bottom: 1px solid var(--hud-alert); display: flex; justify-content: space-between; align-items: center;
+        .cl-header {
+            background: var(--text-cyan); color: black;
+            padding: 10px 20px; font-weight: bold;
+            display: flex; justify-content: space-between;
         }
-        .close-btn { background: transparent; border: 1px solid var(--hud-alert); color: var(--hud-alert); padding: 5px 15px; cursor: pointer; font-family: inherit; }
-        .close-btn:hover { background: var(--hud-alert); color: var(--bg-space); }
-
-        .modal-content { padding: 30px; max-height: 80vh; overflow-y: auto; }
-        .briefing-block { margin-bottom: 30px; border-left: 2px solid var(--hud-dim); padding-left: 20px; }
-        .briefing-title { color: var(--hud-alert); margin-bottom: 10px; }
-        .btn-data { border: 1px solid var(--hud-cyan); color: var(--hud-cyan); padding: 8px 20px; display: inline-block; margin-top: 15px; }
-        .btn-data:hover { background: var(--hud-cyan); color: var(--bg-space); box-shadow: 0 0 15px var(--hud-cyan); }
-
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-
-        @media (max-width: 768px) {
-            .hud-grid { grid-template-columns: 1fr; }
-            header { flex-direction: column; align-items: flex-start; gap: 20px; }
-            .sys-info { text-align: left; }
-            .cockpit-view { clip-path: none; border: 1px solid var(--hud-dim); } /* Simplification mobile */
+        .cl-content { padding: 30px; }
+        
+        .checklist-item {
+            display: flex; justify-content: space-between;
+            border-bottom: 1px dashed #444;
+            padding: 10px 0;
         }
+        .cl-check { color: var(--text-green); }
+
+        @keyframes blink { 50% { opacity: 0.5; } }
+
+        @media (max-width: 900px) {
+            .instrument-panel { grid-template-columns: 1fr; }
+            .mcdu-panel { grid-column: span 1; flex-direction: column; gap: 15px; }
+        }
+
     </style>
 </head>
 <body>
 
-    <main class="cockpit-view">
-        <div class="reticle tl">+ [TL-CAM]</div>
-        <div class="reticle tr">[TR-CAM] +</div>
-        <div class="reticle bl">+ [BL-DATA]</div>
-        <div class="reticle br">[BR-DATA] +</div>
-
-        <header>
-            <div class="pilot-identity">
-                <span class="data-label">// PILOT IDENTIFICATION</span>
-                <h1>{{PRENOM}} {{NOM}}</h1>
-                <div class="pilot-status">
-                    <span class="status-indicator"></span>
-                    STATUS: <span class="alert-text">ACTIVE // SEEKING OPPORTUNITIES</span>
-                </div>
-            </div>
-            <div class="sys-info">
-                [ ROLE: {{TITRE_PROFIL}} ]<br>
-                [ BASE: {{ECOLE_ACTUELLE}} ]<br>
-                [ SYS TIME: <span id="sys-time"></span> ]
-            </div>
-        </header>
-
-        <div class="hud-grid">
-            <section>
-                <div class="target-bio-box">
-                    <span class="data-label">// BIOMETRIC DATA & OBJECTIVES</span>
-                    <p class="bio-text">
-                        >> {{DESCRIPTION_PROFIL}}
-                    </p>
-                </div>
-
-                <div class="systems-check">
-                    <span class="data-label">// SYSTEMS DIAGNOSTIC (FORMATION)</span>
-                    <div class="sys-row">
-                        <span>MASTER ENG. (2025)</span> <span class="sys-status">[IN PROGRESS]</span>
-                    </div>
-                    <div class="sys-row">
-                        <span>CPGE MPSI/PSI</span> <span style="color: var(--hud-cyan);">[COMPLETED]</span>
-                    </div>
-                    <span class="data-label" style="margin-top: 20px;">// MODULES LOADED</span>
-                    <div style="font-size: 0.8rem;">AERODYNAMICS, PROPULSION, AVIONICS, C++</div>
-                </div>
-            </section>
-
-            <section>
-                <div class="sector-title">
-                    ACTIVE MISSIONS (PROJETS)
-                    <span class="deco-coords">COORDS: 48.8566° N, 2.3522° E</span>
-                </div>
+    <main class="instrument-panel">
+        
+        <div class="mfd-unit">
+            <div class="screw tl"></div><div class="screw tr"></div>
+            <div class="screw bl"></div><div class="screw br"></div>
+            
+            <div class="glass-screen">
+                <h2>PFD // PILOT INFO</h2>
                 
-                <div class="mission-grid">
-                    
-                    <article class="mission-card" onclick="openModal('modal-projects')">
-                        <div class="mission-id">[ MISSION ID: ACAD-001 ]</div>
-                        <h3>CONCEPTION DRONE SUPERS.</h3>
-                        <p class="mission-desc">
-                            Design aérodynamique et simulation CFD d'un drone supersonique. Analyse de la traînée et des ondes de choc.
-                        </p>
-                        <div class="btn-engage">ENGAGE MISSION VIEWER >></div>
-                    </article>
-
-                    <article class="mission-card" onclick="openModal('modal-others')">
-                        <div class="mission-id">[ MISSION ID: SIDE-OPS-04 ]</div>
-                        <h3>{{TITRE_AUTRE_CATEGORIE}}</h3>
-                        <p class="mission-desc">
-                            Opérations secondaires : Projets personnels, Hackathons, Expériences associatives.
-                        </p>
-                        <div class="btn-engage">ACCESS ARCHIVES >></div>
-                    </article>
-
+                <div class="attitude-indicator"></div>
+                
+                <div class="speed-tape">
+                    <span>400</span><span>300</span><span>200</span>
                 </div>
-            </section>
+                <div class="alt-tape">
+                    <span>350</span><span>340</span><span>330</span>
+                </div>
+
+                <div class="pfd-content" style="text-align: center; margin-top: 20px;">
+                    <div class="flight-mode">
+                        <span class="mode-box">SPD</span>
+                        <span class="mode-box">LNAV</span>
+                        <span class="mode-box">ALT</span>
+                    </div>
+
+                    <h1 style="font-size: 2rem; color: var(--text-white); margin-bottom: 5px;">{{NOM}}</h1>
+                    <p style="color: var(--text-cyan); margin-bottom: 20px;">{{TITRE_PROFIL}}</p>
+
+                    <div style="text-align: left; padding: 0 50px;">
+                        <div class="param-row">
+                            <span class="param-label">BASE</span>
+                            <span class="param-val">{{ECOLE_ACTUELLE}}</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-label">STATUS</span>
+                            <span class="param-val">FLIGHT LEVEL 400</span>
+                        </div>
+                        <div class="param-row">
+                            <span class="param-label">SPECIALTY</span>
+                            <span class="param-val">AERONAUTICS</span>
+                        </div>
+                        
+                        <div style="margin-top: 20px; border: 1px solid var(--text-green); padding: 10px; background: rgba(0, 255, 0, 0.1);">
+                            <span class="param-label">BIO:</span><br>
+                            <span style="font-size: 0.8rem; color: #ddd;">{{DESCRIPTION_PROFIL}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <footer>
-            <div class="comms-channel">
-                [ COMMS CHANNEL ] <br> 
-                FREQ: <span><a href="mailto:{{EMAIL}}">{{EMAIL}}</a></span>
+        <div class="mfd-unit">
+            <div class="screw tl"></div><div class="screw tr"></div>
+            <div class="screw bl"></div><div class="screw br"></div>
+
+            <div class="glass-screen">
+                <h2>EICAS // SYSTEM STATUS (PROJETS)</h2>
+                
+                <div style="margin-bottom: 10px; border-bottom: 2px solid white; padding-bottom: 5px; display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-white);">T.O. CONFIG</span>
+                    <span style="color: var(--text-green);">NORMAL</span>
+                </div>
+
+                <div class="eicas-grid">
+                    
+                    <div class="cas-message" onclick="openModal('modal-projects')">
+                        <div>
+                            <span class="msg-title">DRONE DESIGN</span>
+                            <span class="msg-desc">Analyse structurelle et aérodynamique.</span>
+                        </div>
+                        <span class="msg-status">COMPLETED</span>
+                    </div>
+
+                    <div class="cas-message">
+                        <div>
+                            <span class="msg-title">PROPULSION SYS</span>
+                            <span class="msg-desc">Optimisation injecteurs Moteur-fusée.</span>
+                        </div>
+                        <span class="msg-status">ACTIVE</span>
+                    </div>
+
+                    <div class="cas-message" onclick="openModal('modal-others')">
+                        <div>
+                            <span class="msg-title">{{TITRE_AUTRE_CATEGORIE}}</span>
+                            <span class="msg-desc">Archives secondaires et logs.</span>
+                        </div>
+                        <span class="msg-status" style="color: var(--text-cyan);">INFO</span>
+                    </div>
+
+                </div>
+
+                <div style="margin-top: auto;">
+                    <div class="param-row">
+                        <span class="param-label">TOTAL HOURS</span>
+                        <span class="param-val">1250 HRS</span>
+                    </div>
+                    <div class="checklist-btn">VIEW FULL LOGS (PDF)</div>
+                </div>
             </div>
-            <div>
-                <a href="{{LINKEDIN_URL}}" target="_blank">[ ESTABLISH UPLINK (LINKEDIN) ]</a>
+        </div>
+
+        <div class="mcdu-panel">
+            <div class="master-warn active">MASTER<br>WARN</div>
+
+            <div style="display: flex; gap: 10px;">
+                <a href="mailto:{{EMAIL}}" class="phys-btn">RADIO (MAIL)</a>
+                <a href="{{LINKEDIN_URL}}" target="_blank" class="phys-btn">DATALINK (LINKEDIN)</a>
+                <a href="mentions.html" class="phys-btn">LEGAL</a>
             </div>
-            <div>
-                <a href="mentions.html">[ LEGAL PROTOCOLS ]</a>
-            </div>
-        </footer>
+        </div>
 
     </main>
 
     <dialog id="modal-projects">
-        <div class="modal-header">
-            <span>>> MISSION BRIEFING: ACAD-001</span>
-            <button class="close-btn" onclick="closeModal('modal-projects')">TERMINATE [X]</button>
+        <div class="cl-header">
+            <span>CHECKLIST: DRONE DESIGN</span>
+            <span style="cursor: pointer;" onclick="closeModal('modal-projects')">[ CLOSE ]</span>
         </div>
-        <div class="modal-content">
-            
-            <div class="briefing-block">
-                <h4 class="briefing-title">OBJECTIVE: DRONE SUPERSONIQUE</h4>
-                <p style="margin-bottom: 10px;">[YEAR: 2024] // [TOOLS: ANSYS FLUENT, CATIA]</p>
-                <p>
-                    Analyse complète des performances d'un concept de drone en régime supersonique (Mach 1.5). 
-                    Optimisation de la forme pour réduire le bang supersonique.
-                </p>
-                <a href="#" class="btn-data">[ DOWNLOAD TECHNICAL REPORT ]</a>
+        <div class="cl-content">
+            <div class="checklist-item">
+                <span class="param-label">YEAR</span>
+                <span class="param-val">2024</span>
             </div>
-
-             <div class="briefing-block">
-                <h4 class="briefing-title">OBJECTIVE: SYSTÈME EMBARQUÉ</h4>
-                <p style="margin-bottom: 10px;">[YEAR: 2023] // [TOOLS: C++, STM32]</p>
-                <p>
-                    Développement du pilote automatique d'un mini-drone. Codage des boucles d'asservissement PID.
-                </p>
+            <div class="checklist-item">
+                <span class="param-label">SOFTWARE</span>
+                <span class="param-val">CATIA / ANSYS</span>
             </div>
-
+            <div style="margin-top: 20px; font-size: 0.9rem; color: #ccc;">
+                <p>Conception complète d'un drone à voilure fixe pour surveillance maritime.</p>
+                <ul style="margin-left: 20px; margin-top: 10px; color: var(--text-green);">
+                    <li>Calcul de portance (CL/CD)</li>
+                    <li>Choix des matériaux composites</li>
+                    <li>Intégration avionique</li>
+                </ul>
+            </div>
+            <button class="checklist-btn" style="margin-top: 20px;">DOWNLOAD FLIGHT PLAN (PDF)</button>
         </div>
     </dialog>
 
     <dialog id="modal-others">
-        <div class="modal-header">
-            <span>>> ARCHIVE ACCESS</span>
-            <button class="close-btn" onclick="closeModal('modal-others')">TERMINATE [X]</button>
+        <div class="cl-header">
+            <span>LOGS: {{TITRE_AUTRE_CATEGORIE}}</span>
+            <span style="cursor: pointer;" onclick="closeModal('modal-others')">[ CLOSE ]</span>
         </div>
-        <div class="modal-content">
-            <p>[ DATA RESTRICTED ] Contenu de la catégorie secondaire...</p>
+        <div class="cl-content">
+            <p>Affichage des données secondaires...</p>
         </div>
     </dialog>
 
     <script>
-        // Script pour l'heure système (effet temps réel)
-        function updateTime() {
-            const now = new Date();
-            const timeString = now.toISOString().substr(11, 8);
-            document.getElementById('sys-time').textContent = timeString + ' ZULU';
-        }
-        setInterval(updateTime, 1000); updateTime();
-
-        // Modales
         function openModal(id) { document.getElementById(id).showModal(); }
         function closeModal(id) { document.getElementById(id).close(); }
         document.querySelectorAll('dialog').forEach(d => {
             d.addEventListener('click', e => { if (e.target === d) d.close(); });
         });
     </script>
-
 </body>
 </html>
