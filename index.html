@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{TITRE_DU_SITE}} // FLIGHT DECK</title>
+    <title>{{TITRE_DU_SITE}} // FLIGHT DECK PRO</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,417 +11,486 @@
 
     <style>
         /* =========================================
-           1. VARIABLES (Standard Avionique)
+           1. VARIABLES & PALETTE AVIONIQUE
         ========================================= */
         :root {
-            /* Matériaux */
-            --panel-grey: #363636;     /* Gris Panneau Cockpit */
-            --screen-bg: #000000;      /* Fond écran éteint */
-            --bezel-dark: #1a1a1a;     /* Contour écran */
+            /* Structure */
+            --cockpit-grey: #2B2B2B;    /* Gris Airbus */
+            --screen-black: #050505;    /* Noir Écran */
+            --bezel-color: #151515;     /* Contour plastique */
             
-            /* Couleurs Instruments */
-            --sky-blue: #0078D7;       /* Horizon Ciel */
-            --gnd-brown: #8B4513;      /* Horizon Sol */
-            --text-green: #00FF00;     /* Info standard (Airbus Green) */
-            --text-cyan: #00FFFF;      /* Valeurs */
-            --text-amber: #FFAA00;     /* Caution / Warning */
-            --text-white: #FFFFFF;
+            /* Data Colors (Airbus/Boeing Standard) */
+            --pfd-sky: #0072BB;         /* Ciel Horizon */
+            --pfd-gnd: #573618;         /* Sol Horizon */
+            --color-green: #37D643;     /* Active Mode / Normal */
+            --color-cyan: #2BC4F5;      /* Values / Selected */
+            --color-magenta: #D946EF;   /* Target / Constraint */
+            --color-amber: #FF9900;     /* Caution */
+            --color-red: #FF0000;       /* Warning */
+            --color-white: #EDECEC;     /* Labels */
             
-            /* Vis (Déco) */
-            --screw-color: #111;
+            --glass-glare: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 40%, transparent 100%);
         }
 
         /* =========================================
-           2. STRUCTURE PANNEAU
+           2. STRUCTURE CABINE
         ========================================= */
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background-color: #111; /* Fond cabine sombre */
-            color: var(--text-white);
+            background-color: #0b0b0b;
+            color: var(--color-white);
             font-family: 'B612 Mono', monospace;
-            padding: 20px;
-            min-height: 100vh;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* Pas de scroll global, on est dans un cockpit */
+        }
+
+        /* Le Main Panel */
+        .main-panel {
+            background-color: var(--cockpit-grey);
+            border-top: 5px solid #444;
+            border-radius: 20px 20px 0 0;
+            padding: 40px;
+            width: 95vw;
+            max-width: 1400px;
+            height: 90vh;
+            box-shadow: inset 0 0 80px rgba(0,0,0,0.8);
+            display: grid;
+            grid-template-rows: 1fr auto;
+            gap: 30px;
+            position: relative;
+        }
+
+        /* Les vis de fixation du panneau */
+        .panel-screw {
+            position: absolute; width: 16px; height: 16px;
+            background: radial-gradient(circle, #555, #111);
+            border-radius: 50%;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.1);
+        }
+        .panel-screw::after { content: "+"; color: #222; position: absolute; top: -3px; left: 3px; font-size: 16px; }
+
+        /* =========================================
+           3. DU (DISPLAY UNITS) - ÉCRANS
+        ========================================= */
+        .screens-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* PFD (Gauche) / ND (Droite) */
+            gap: 40px;
+            height: 100%;
+        }
+
+        .display-unit {
+            background-color: var(--bezel-color);
+            border-radius: 12px;
+            padding: 25px; /* Cadre physique épais */
+            box-shadow: 
+                5px 5px 15px rgba(0,0,0,0.6),
+                inset 1px 1px 2px rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .screen-glass {
+            background-color: var(--screen-black);
+            flex-grow: 1;
+            border: 2px solid #333;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 30px black;
+        }
+
+        /* Reflet Anti-Reflet */
+        .screen-glass::after {
+            content: ""; position: absolute; inset: 0;
+            background: var(--glass-glare);
+            pointer-events: none; z-index: 10;
+        }
+
+        /* Scanlines subtiles */
+        .screen-glass::before {
+            content: ""; position: absolute; inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.02) 3px);
+            pointer-events: none; z-index: 9;
+        }
+
+        /* =========================================
+           4. ÉCRAN GAUCHE : PFD (Primary Flight Display)
+           Contenu : Identité, Bio
+        ========================================= */
+        
+        /* FMA (Flight Mode Annunciator) - Haut de l'écran */
+        .fma-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+            border-bottom: 2px solid var(--color-white);
+            height: 12%;
+            margin-bottom: 10px;
+        }
+        .fma-col {
+            border-right: 1px solid #444;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .fma-col:last-child { border-right: none; }
+        
+        .mode-active { color: var(--color-green); }
+        .mode-armed { color: var(--color-cyan); }
+        .mode-box { border: 1px solid var(--color-white); padding: 0 4px; margin-top: 2px; }
+
+        /* Zone Centrale PFD */
+        .pfd-center {
+            position: relative;
+            height: 88%;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* Le Tableau de Bord Principal */
-        .instrument-panel {
-            background-color: var(--panel-grey);
-            border: 4px solid #222;
-            border-radius: 10px;
-            padding: 30px;
-            max-width: 1200px;
-            width: 100%;
-            display: grid;
-            grid-template-columns: 1fr 1.5fr; /* PFD à gauche, ND/EICAS à droite */
-            gap: 30px;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
-            position: relative;
-        }
-
-        /* Effet de texture "Plastique Granuleux" sur le panneau */
-        .instrument-panel::before {
-            content: ""; position: absolute; inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
-            pointer-events: none;
+        /* Horizon Artificiel (Arrière-plan) */
+        .horizon {
+            position: absolute; top: 15%; left: 15%; width: 70%; height: 60%;
+            background: linear-gradient(to bottom, var(--pfd-sky) 50%, var(--pfd-gnd) 50%);
+            border: 1px solid #666;
             opacity: 0.4;
+            z-index: 0;
+        }
+        /* Ligne jaune (The Bird) */
+        .horizon::after {
+            content: ""; position: absolute; top: 50%; left: 20%; width: 60%; height: 2px;
+            background: #FFD700; box-shadow: 0 0 5px #FFD700;
+            transform: translateY(-50%);
         }
 
-        /* =========================================
-           3. UNITÉS D'AFFICHAGE (Écrans)
-        ========================================= */
-        .mfd-unit {
-            background-color: var(--bezel-dark);
-            border-radius: 15px;
-            padding: 20px; /* Épaisseur du cadre plastique */
-            box-shadow: 
-                5px 5px 10px rgba(0,0,0,0.5), 
-                inset 2px 2px 5px rgba(255,255,255,0.1);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Les 4 vis aux coins */
-        .screw {
-            position: absolute; width: 12px; height: 12px;
-            background: radial-gradient(circle at 30% 30%, #555, #000);
-            border-radius: 50%;
-            box-shadow: inset 1px 1px 2px black;
-        }
-        .screw::after { content: "+"; position: absolute; top: -3px; left: 1px; color: #222; font-size: 14px; transform: rotate(45deg); }
-        .tl { top: 8px; left: 8px; } .tr { top: 8px; right: 8px; }
-        .bl { bottom: 8px; left: 8px; } .br { bottom: 8px; right: 8px; }
-
-        /* L'écran en verre lui-même */
-        .glass-screen {
-            background-color: var(--screen-bg);
-            border: 2px solid #444;
-            border-radius: 4px;
-            flex-grow: 1;
-            padding: 15px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.9); /* Effet renfoncé */
-            overflow: hidden;
-            position: relative;
-        }
-        
-        /* Reflet sur l'écran */
-        .glass-screen::after {
-            content: ""; position: absolute; top: 0; right: 0; width: 50%; height: 100%;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.03));
-            pointer-events: none;
-        }
-
-        h2 { font-size: 0.9rem; color: var(--text-white); margin-bottom: 10px; text-transform: uppercase; border-bottom: 1px solid #555; padding-bottom: 5px; }
-
-        /* =========================================
-           4. CONTENU : PFD (Primary Flight Display) - BIO
-        ========================================= */
-        /* Horizon Artificiel (Background stylisé) */
-        .attitude-indicator {
-            position: absolute; top: 20%; left: 20%; width: 60%; height: 40%;
-            background: linear-gradient(to bottom, var(--sky-blue) 50%, var(--gnd-brown) 50%);
-            border: 1px solid white;
-            opacity: 0.3; z-index: 0;
-        }
-        .attitude-indicator::before {
-            content: ""; position: absolute; top: 50%; left: 10%; width: 80%; height: 1px; background: yellow; box-shadow: 0 0 5px yellow;
-        }
-
-        .pfd-content { position: relative; z-index: 1; }
-        
-        .flight-mode {
-            display: flex; justify-content: space-between; font-weight: bold; font-size: 1rem; color: var(--text-green); margin-bottom: 20px;
-        }
-        .mode-box { border: 1px solid var(--text-white); padding: 2px 5px; }
-
-        .param-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; }
-        .param-label { color: var(--text-cyan); }
-        .param-val { color: var(--text-green); }
-
+        /* Bandes Vitesse/Altitude */
         .speed-tape {
-            position: absolute; left: 0; top: 20%; bottom: 20%; width: 40px;
-            border-right: 1px solid white; background: rgba(0,0,0,0.5);
-            font-size: 0.8rem; text-align: right; padding-right: 5px; color: white;
-            display: flex; flex-direction: column; justify-content: space-around;
+            position: absolute; left: 0; top: 15%; bottom: 15%; width: 12%;
+            background: rgba(20,20,20,0.8); border-right: 2px solid var(--color-white);
+            display: flex; flex-direction: column; justify-content: space-around; text-align: right; padding-right: 5px; color: var(--color-white); font-weight: bold; font-size: 0.9rem;
         }
-        
         .alt-tape {
-            position: absolute; right: 0; top: 20%; bottom: 20%; width: 50px;
-            border-left: 1px solid white; background: rgba(0,0,0,0.5);
-            font-size: 0.8rem; text-align: left; padding-left: 5px; color: white;
-            display: flex; flex-direction: column; justify-content: space-around;
+            position: absolute; right: 0; top: 15%; bottom: 15%; width: 14%;
+            background: rgba(20,20,20,0.8); border-left: 2px solid var(--color-white);
+            display: flex; flex-direction: column; justify-content: space-around; text-align: left; padding-left: 5px; color: var(--color-green); font-weight: bold; font-size: 0.9rem;
         }
+        .magenta-bug { color: var(--color-magenta); font-size: 0.7rem; }
 
-        /* =========================================
-           5. CONTENU : EICAS (Engine/Status) - PROJETS
-        ========================================= */
-        .eicas-grid {
-            display: grid; grid-template-columns: 1fr; gap: 10px;
-        }
-
-        .cas-message {
-            display: flex; justify-content: space-between; align-items: center;
-            background: #111;
-            border: 1px solid #333;
-            padding: 10px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .cas-message:hover { background: #222; border-color: var(--text-cyan); }
-        
-        .msg-title { color: var(--text-white); font-weight: bold; }
-        .msg-status { color: var(--text-amber); font-size: 0.8rem; }
-        .msg-desc { color: var(--text-green); font-size: 0.75rem; margin-top: 4px; display: block;}
-
-        .checklist-btn {
-            margin-top: 20px;
-            background: #222; border: 1px solid var(--text-cyan);
-            color: var(--text-cyan); padding: 10px; width: 100%;
-            text-align: center; cursor: pointer; text-transform: uppercase;
-        }
-        .checklist-btn:hover { background: var(--text-cyan); color: black; }
-
-        /* =========================================
-           6. FOOTER (MCDU / Control Unit)
-        ========================================= */
-        .mcdu-panel {
-            margin-top: 30px;
-            grid-column: span 2;
-            border-top: 2px solid #222;
-            padding-top: 15px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-
-        /* Boutons Physiques */
-        .phys-btn {
-            background: #1a1a1a;
-            color: #ccc;
-            border: 2px solid;
-            border-color: #444 #111 #111 #444; /* Effet 3D bouton */
-            padding: 10px 20px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            text-transform: uppercase;
-            box-shadow: 2px 2px 5px black;
-        }
-        .phys-btn:active {
-            border-color: #111 #444 #444 #111; /* Enfoncé */
-            transform: translateY(2px);
-        }
-        
-        /* Master Warning */
-        .master-warn {
-            background: #500; color: #300;
-            border: 2px solid #300; padding: 10px 20px;
-            font-weight: bold; border-radius: 4px;
+        /* TEXTE INFO (Par dessus l'horizon) */
+        .pilot-info-overlay {
+            z-index: 5;
             text-align: center;
+            text-shadow: 1px 1px 0 #000;
+            background: rgba(0,0,0,0.6);
+            padding: 15px;
+            border: 1px solid var(--color-cyan);
+            max-width: 80%;
         }
-        .master-warn.active {
-            background: #ff0000; color: white;
-            box-shadow: 0 0 15px #ff0000;
-            animation: blink 0.5s infinite;
+        
+        .pilot-name { font-size: 1.8rem; color: var(--color-white); letter-spacing: 2px; margin-bottom: 5px; }
+        .pilot-role { font-size: 1rem; color: var(--color-cyan); margin-bottom: 15px; }
+        .pilot-bio { font-size: 0.85rem; color: var(--color-green); line-height: 1.4; text-align: left; }
+
+        /* Heading (Bas) */
+        .heading-tape {
+            position: absolute; bottom: 0; left: 20%; width: 60%; height: 30px;
+            border-top: 2px solid var(--color-white);
+            display: flex; justify-content: center; align-items: center;
+            color: var(--color-white); font-size: 1.2rem;
         }
 
         /* =========================================
-           7. MODALES (Checklist Style)
+           5. ÉCRAN DROIT : ECAM (System Display)
+           Haut: Projets / Bas: Stages
+        ========================================= */
+        .ecam-grid {
+            display: grid;
+            grid-template-rows: 1fr 1fr; /* 50% Haut / 50% Bas */
+            height: 100%;
+        }
+
+        /* UPPER ECAM : PROJETS (Engine params style) */
+        .upper-ecam {
+            border-bottom: 2px solid var(--color-white);
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .screen-title { color: var(--color-white); text-decoration: underline; margin-bottom: 15px; display: block; font-size: 0.9rem; }
+
+        .project-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px;
+            cursor: pointer;
+            padding: 5px;
+        }
+        .project-row:hover { background: rgba(255,255,255,0.1); }
+        
+        .gauge-label { color: var(--color-white); font-size: 0.9rem; flex: 1; }
+        .gauge-bar-container { flex: 2; height: 10px; background: #333; margin: 0 10px; position: relative; }
+        .gauge-bar-fill { height: 100%; background: var(--color-green); }
+        .gauge-val { color: var(--color-cyan); width: 40px; text-align: right; font-size: 0.9rem; }
+
+        /* LOWER ECAM : STAGES (System Log style) */
+        .lower-ecam {
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #333;
+            padding-bottom: 5px;
+        }
+        .log-date { color: var(--color-cyan); font-size: 0.8rem; }
+        .log-details { display: flex; flex-direction: column; }
+        .log-company { color: var(--color-white); font-weight: bold; font-size: 0.95rem; }
+        .log-role { color: var(--color-green); font-size: 0.85rem; }
+
+        /* =========================================
+           6. FOOTER (MCDU / CONTROLS)
+        ========================================= */
+        .control-panel {
+            background: #222;
+            border-top: 2px solid #111;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .master-warn-btn {
+            background: #600; color: #aaa;
+            border: 4px solid #400;
+            width: 80px; height: 60px;
+            display: flex; justify-content: center; align-items: center; text-align: center;
+            font-weight: bold; font-size: 0.8rem;
+            box-shadow: 0 5px 10px black;
+            cursor: pointer;
+            animation: warning-flash 0.8s infinite;
+        }
+        @keyframes warning-flash { 50% { background: #FF0000; color: white; box-shadow: 0 0 20px #FF0000; border-color: #aa0000; } }
+
+        .fcu-knob {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: conic-gradient(#333 0deg, #111 90deg, #333 180deg, #111 270deg);
+            border: 2px solid #555;
+            box-shadow: 0 5px 10px black;
+            position: relative;
+        }
+        .fcu-knob::after { content: ""; position: absolute; top: 5px; left: 28px; width: 4px; height: 25px; background: white; }
+
+        .action-buttons { display: flex; gap: 15px; }
+        .push-btn {
+            background: #151515; color: #ddd;
+            border: 1px solid #444; border-bottom: 4px solid black;
+            padding: 12px 25px;
+            font-family: 'B612 Mono', monospace; font-size: 0.9rem;
+            cursor: pointer; text-transform: uppercase;
+        }
+        .push-btn:active { border-bottom: 1px solid black; transform: translateY(3px); }
+
+        /* =========================================
+           7. MODALES (CHECKLIST)
         ========================================= */
         dialog {
-            inset: 0; margin: auto; /* Centrage forcé */
-            background: #151515;
-            border: 2px solid var(--text-cyan);
-            color: var(--text-white);
-            width: 80%; max-width: 700px;
-            padding: 0;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
-            font-family: 'B612 Mono', monospace;
+            inset: 0; margin: auto;
+            background: #101010;
+            border: 2px solid var(--color-cyan);
+            color: var(--color-white);
+            width: 600px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.9);
+            font-family: 'B612 Mono';
         }
-        dialog::backdrop { background: rgba(0,0,0,0.6); }
-
-        .cl-header {
-            background: var(--text-cyan); color: black;
-            padding: 10px 20px; font-weight: bold;
-            display: flex; justify-content: space-between;
-        }
-        .cl-content { padding: 30px; }
+        dialog::backdrop { background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); }
         
-        .checklist-item {
-            display: flex; justify-content: space-between;
-            border-bottom: 1px dashed #444;
-            padding: 10px 0;
+        .modal-header { background: var(--color-cyan); color: black; padding: 10px; font-weight: bold; display: flex; justify-content: space-between;}
+        .modal-body { padding: 30px; }
+        .checklist-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #333; padding: 10px 0; }
+        .cl-val { color: var(--color-green); }
+
+        @media (max-width: 1024px) {
+            .screens-container { grid-template-columns: 1fr; }
+            .display-unit:last-child { display: none; /* Cache l'écran droit sur mobile pour focus PFD */ }
         }
-        .cl-check { color: var(--text-green); }
-
-        @keyframes blink { 50% { opacity: 0.5; } }
-
-        @media (max-width: 900px) {
-            .instrument-panel { grid-template-columns: 1fr; }
-            .mcdu-panel { grid-column: span 1; flex-direction: column; gap: 15px; }
-        }
-
     </style>
 </head>
 <body>
 
-    <main class="instrument-panel">
-        
-        <div class="mfd-unit">
-            <div class="screw tl"></div><div class="screw tr"></div>
-            <div class="screw bl"></div><div class="screw br"></div>
+    <main class="main-panel">
+        <div class="panel-screw" style="top: 10px; left: 10px;"></div>
+        <div class="panel-screw" style="top: 10px; right: 10px;"></div>
+
+        <div class="screens-container">
             
-            <div class="glass-screen">
-                <h2>PFD // PILOT INFO</h2>
-                
-                <div class="attitude-indicator"></div>
-                
-                <div class="speed-tape">
-                    <span>400</span><span>300</span><span>200</span>
-                </div>
-                <div class="alt-tape">
-                    <span>350</span><span>340</span><span>330</span>
-                </div>
-
-                <div class="pfd-content" style="text-align: center; margin-top: 20px;">
-                    <div class="flight-mode">
-                        <span class="mode-box">SPD</span>
-                        <span class="mode-box">LNAV</span>
-                        <span class="mode-box">ALT</span>
-                    </div>
-
-                    <h1 style="font-size: 2rem; color: var(--text-white); margin-bottom: 5px;">{{NOM}}</h1>
-                    <p style="color: var(--text-cyan); margin-bottom: 20px;">{{TITRE_PROFIL}}</p>
-
-                    <div style="text-align: left; padding: 0 50px;">
-                        <div class="param-row">
-                            <span class="param-label">BASE</span>
-                            <span class="param-val">{{ECOLE_ACTUELLE}}</span>
-                        </div>
-                        <div class="param-row">
-                            <span class="param-label">STATUS</span>
-                            <span class="param-val">FLIGHT LEVEL 400</span>
-                        </div>
-                        <div class="param-row">
-                            <span class="param-label">SPECIALTY</span>
-                            <span class="param-val">AERONAUTICS</span>
-                        </div>
-                        
-                        <div style="margin-top: 20px; border: 1px solid var(--text-green); padding: 10px; background: rgba(0, 255, 0, 0.1);">
-                            <span class="param-label">BIO:</span><br>
-                            <span style="font-size: 0.8rem; color: #ddd;">{{DESCRIPTION_PROFIL}}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="mfd-unit">
-            <div class="screw tl"></div><div class="screw tr"></div>
-            <div class="screw bl"></div><div class="screw br"></div>
-
-            <div class="glass-screen">
-                <h2>EICAS // SYSTEM STATUS (PROJETS)</h2>
-                
-                <div style="margin-bottom: 10px; border-bottom: 2px solid white; padding-bottom: 5px; display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-white);">T.O. CONFIG</span>
-                    <span style="color: var(--text-green);">NORMAL</span>
-                </div>
-
-                <div class="eicas-grid">
+            <div class="display-unit">
+                <div class="screen-glass">
                     
-                    <div class="cas-message" onclick="openModal('modal-projects')">
-                        <div>
-                            <span class="msg-title">DRONE DESIGN</span>
-                            <span class="msg-desc">Analyse structurelle et aérodynamique.</span>
-                        </div>
-                        <span class="msg-status">COMPLETED</span>
-                    </div>
+                    <div class="fma-grid">
+                        <div class="fma-col"><span class="mode-active">SPD</span></div> <div class="fma-col"><span class="mode-active">NAV</span><span class="mode-armed" style="font-size:0.7rem;">CAT 3</span></div> <div class="fma-col"></div> <div class="fma-col"><span class="mode-active">ALT</span><span class="mode-magenta">FL390</span></div> <div class="fma-col"><span class="mode-box mode-active">AP1+2</span></div> </div>
 
-                    <div class="cas-message">
-                        <div>
-                            <span class="msg-title">PROPULSION SYS</span>
-                            <span class="msg-desc">Optimisation injecteurs Moteur-fusée.</span>
+                    <div class="pfd-center">
+                        <div class="horizon"></div>
+                        
+                        <div class="speed-tape">
+                            <span class="magenta-bug">V2</span>
+                            <span>320</span>
+                            <span style="color:var(--color-green); font-size: 1.1rem; border:1px solid white;">300</span>
+                            <span>280</span>
+                            <span>260</span>
                         </div>
-                        <span class="msg-status">ACTIVE</span>
-                    </div>
 
-                    <div class="cas-message" onclick="openModal('modal-others')">
-                        <div>
-                            <span class="msg-title">{{TITRE_AUTRE_CATEGORIE}}</span>
-                            <span class="msg-desc">Archives secondaires et logs.</span>
+                        <div class="alt-tape">
+                            <span class="magenta-bug">FL390</span>
+                            <span>35000</span>
+                            <span style="color:var(--color-green); font-size: 1.1rem; border:1px solid white;">34500</span>
+                            <span>34000</span>
+                            <span>GROUND</span>
                         </div>
-                        <span class="msg-status" style="color: var(--text-cyan);">INFO</span>
+
+                        <div class="pilot-info-overlay">
+                            <div class="pilot-name">{{NOM}}</div>
+                            <div class="pilot-role">{{TITRE_PROFIL}}</div>
+                            <div class="pilot-bio">
+                                >> {{DESCRIPTION_PROFIL}}
+                            </div>
+                        </div>
+
+                        <div class="heading-tape">
+                            <span>270</span> ... <span>280</span> ... <span style="color:var(--color-green);">285</span> ... <span>290</span>
+                        </div>
                     </div>
 
                 </div>
-
-                <div style="margin-top: auto;">
-                    <div class="param-row">
-                        <span class="param-label">TOTAL HOURS</span>
-                        <span class="param-val">1250 HRS</span>
-                    </div>
-                    <div class="checklist-btn">VIEW FULL LOGS (PDF)</div>
-                </div>
+                <div style="color:#555; text-align:center; font-size:0.7rem; margin-top:5px;">PFD - CAPT SIDE</div>
             </div>
+
+            <div class="display-unit">
+                <div class="screen-glass">
+                    <div class="ecam-grid">
+                        
+                        <div class="upper-ecam">
+                            <span class="screen-title">E/WD : ACTIVE PROJECTS</span>
+                            
+                            <div class="project-row" onclick="openModal('modal-projects')">
+                                <span class="gauge-label">DRONE DESIGN</span>
+                                <div class="gauge-bar-container"><div class="gauge-bar-fill" style="width: 100%;"></div></div>
+                                <span class="gauge-val">98%</span>
+                            </div>
+
+                            <div class="project-row" onclick="openModal('modal-projects')">
+                                <span class="gauge-label">PROPULSION</span>
+                                <div class="gauge-bar-container"><div class="gauge-bar-fill" style="width: 75%;"></div></div>
+                                <span class="gauge-val">75%</span>
+                            </div>
+
+                            <div class="project-row" onclick="openModal('modal-others')">
+                                <span class="gauge-label">{{TITRE_AUTRE_CATEGORIE}}</span>
+                                <div class="gauge-bar-container"><div class="gauge-bar-fill" style="width: 40%; background: var(--color-amber);"></div></div>
+                                <span class="gauge-val" style="color: var(--color-amber);">IDLE</span>
+                            </div>
+
+                            <div style="margin-top: 20px; color: var(--color-amber); font-size: 0.8rem;">
+                                T.O. INHIBIT <br> NO BLUE
+                            </div>
+                        </div>
+
+                        <div class="lower-ecam">
+                            <span class="screen-title">SD : FLIGHT HISTORY (STAGES)</span>
+                            
+                            <div class="log-entry">
+                                <span class="log-date">2024</span>
+                                <div class="log-details">
+                                    <span class="log-company">AIRBUS ATLANTIC</span>
+                                    <span class="log-role">Stage Ingénieur Méthodes (6 mois)</span>
+                                </div>
+                            </div>
+
+                            <div class="log-entry">
+                                <span class="log-date">2023</span>
+                                <div class="log-details">
+                                    <span class="log-company">SAFRAN</span>
+                                    <span class="log-role">Assistant R&D - Matériaux Composites</span>
+                                </div>
+                            </div>
+
+                             <div class="log-entry" style="border:none;">
+                                <span class="log-date">2022</span>
+                                <div class="log-details">
+                                    <span class="log-company">THALES</span>
+                                    <span class="log-role">Découverte Avionique</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div style="color:#555; text-align:center; font-size:0.7rem; margin-top:5px;">ECAM - SYS DISPLAY</div>
+            </div>
+
         </div>
 
-        <div class="mcdu-panel">
-            <div class="master-warn active">MASTER<br>WARN</div>
+        <div class="control-panel">
+            <div class="master-warn-btn" onclick="alert('CAUTION: HIRING IMMINENT')">MASTER<br>WARN</div>
+            
+            <div style="text-align:center;">
+                <div class="fcu-knob"></div>
+                <div style="font-size:0.6rem; color:#888; margin-top:5px;">SPD/MACH</div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="push-btn" onclick="window.location.href='mailto:{{EMAIL}}'">VHF 1 (EMAIL)</button>
+                <button class="push-btn" onclick="window.open('{{LINKEDIN_URL}}')">ACARS (LINKEDIN)</button>
+                <button class="push-btn" onclick="window.location.href='mentions.html'">LEGAL</button>
+            </div>
 
-            <div style="display: flex; gap: 10px;">
-                <a href="mailto:{{EMAIL}}" class="phys-btn">RADIO (MAIL)</a>
-                <a href="{{LINKEDIN_URL}}" target="_blank" class="phys-btn">DATALINK (LINKEDIN)</a>
-                <a href="mentions.html" class="phys-btn">LEGAL</a>
+            <div style="text-align:center;">
+                <div class="fcu-knob"></div>
+                <div style="font-size:0.6rem; color:#888; margin-top:5px;">ALT</div>
             </div>
         </div>
 
     </main>
 
     <dialog id="modal-projects">
-        <div class="cl-header">
-            <span>CHECKLIST: DRONE DESIGN</span>
-            <span style="cursor: pointer;" onclick="closeModal('modal-projects')">[ CLOSE ]</span>
+        <div class="modal-header">
+            <span>ECAM ACTION : DRONE PROJECT</span>
+            <span style="cursor: pointer;" onclick="document.getElementById('modal-projects').close()">[ CLR ]</span>
         </div>
-        <div class="cl-content">
-            <div class="checklist-item">
-                <span class="param-label">YEAR</span>
-                <span class="param-val">2024</span>
+        <div class="modal-body">
+            <div class="checklist-row">
+                <span>YEAR</span> <span class="cl-val">2024</span>
             </div>
-            <div class="checklist-item">
-                <span class="param-label">SOFTWARE</span>
-                <span class="param-val">CATIA / ANSYS</span>
+            <div class="checklist-row">
+                <span>STATUS</span> <span class="cl-val" style="color:var(--color-green);">COMPLETED</span>
             </div>
-            <div style="margin-top: 20px; font-size: 0.9rem; color: #ccc;">
-                <p>Conception complète d'un drone à voilure fixe pour surveillance maritime.</p>
-                <ul style="margin-left: 20px; margin-top: 10px; color: var(--text-green);">
-                    <li>Calcul de portance (CL/CD)</li>
-                    <li>Choix des matériaux composites</li>
-                    <li>Intégration avionique</li>
-                </ul>
-            </div>
-            <button class="checklist-btn" style="margin-top: 20px;">DOWNLOAD FLIGHT PLAN (PDF)</button>
+            <p style="margin-top:20px; line-height:1.6; color:#ccc;">
+                Conception complète d'un drone tactique. Simulation des contraintes aérodynamiques sous ANSYS Fluent.
+            </p>
+            <button class="push-btn" style="width:100%; margin-top:20px; border-bottom:2px solid #333;">DOWNLOAD TECH SPECS (PDF)</button>
         </div>
     </dialog>
 
     <dialog id="modal-others">
-        <div class="cl-header">
-            <span>LOGS: {{TITRE_AUTRE_CATEGORIE}}</span>
-            <span style="cursor: pointer;" onclick="closeModal('modal-others')">[ CLOSE ]</span>
+        <div class="modal-header">
+            <span>ECAM ACTION : OTHER LOGS</span>
+            <span style="cursor: pointer;" onclick="document.getElementById('modal-others').close()">[ CLR ]</span>
         </div>
-        <div class="cl-content">
-            <p>Affichage des données secondaires...</p>
+        <div class="modal-body">
+            <p>Données secondaires...</p>
         </div>
     </dialog>
 
-    <script>
-        function openModal(id) { document.getElementById(id).showModal(); }
-        function closeModal(id) { document.getElementById(id).close(); }
-        document.querySelectorAll('dialog').forEach(d => {
-            d.addEventListener('click', e => { if (e.target === d) d.close(); });
-        });
-    </script>
 </body>
 </html>
