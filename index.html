@@ -3,494 +3,477 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{TITRE_DU_SITE}} // FLIGHT DECK PRO</title>
+    <title>{{TITRE_DU_SITE}}</title>
+    <meta name="description" content="Portfolio Technique & Ingénierie">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=B612+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 
     <style>
         /* =========================================
-           1. VARIABLES & PALETTE AVIONIQUE
+           1. VARIABLES (Thème "Plan Technique")
         ========================================= */
         :root {
-            /* Structure */
-            --cockpit-grey: #2B2B2B;    /* Gris Airbus */
-            --screen-black: #050505;    /* Noir Écran */
-            --bezel-color: #151515;     /* Contour plastique */
+            --bg-paper: #F7F9FC;       /* Blanc cassé / Papier technique */
+            --grid-line: #E1E6EB;      /* Ligne de grille très légère */
+            --ink-color: #1A202C;      /* Noir texte principal */
+            --blueprint-blue: #0056D2; /* Bleu Ingénieur (Traits, Cadres) */
+            --technical-grey: #718096; /* Gris pour les métadonnées */
+            --alert-red: #E53E3E;      /* Pour les interactions importantes */
             
-            /* Data Colors (Airbus/Boeing Standard) */
-            --pfd-sky: #0072BB;         /* Ciel Horizon */
-            --pfd-gnd: #573618;         /* Sol Horizon */
-            --color-green: #37D643;     /* Active Mode / Normal */
-            --color-cyan: #2BC4F5;      /* Values / Selected */
-            --color-magenta: #D946EF;   /* Target / Constraint */
-            --color-amber: #FF9900;     /* Caution */
-            --color-red: #FF0000;       /* Warning */
-            --color-white: #EDECEC;     /* Labels */
-            
-            --glass-glare: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 40%, transparent 100%);
+            --border-thick: 2px solid var(--blueprint-blue);
+            --border-thin: 1px solid var(--blueprint-blue);
         }
 
         /* =========================================
-           2. STRUCTURE CABINE
+           2. RESET & BASE (Papier Millimétré)
         ========================================= */
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background-color: #0b0b0b;
-            color: var(--color-white);
-            font-family: 'B612 Mono', monospace;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden; /* Pas de scroll global, on est dans un cockpit */
-        }
-
-        /* Le Main Panel */
-        .main-panel {
-            background-color: var(--cockpit-grey);
-            border-top: 5px solid #444;
-            border-radius: 20px 20px 0 0;
+            background-color: var(--bg-paper);
+            color: var(--ink-color);
+            font-family: 'Roboto Mono', monospace; /* Tout en mono par défaut */
+            line-height: 1.5;
             padding: 40px;
-            width: 95vw;
-            max-width: 1400px;
-            height: 90vh;
-            box-shadow: inset 0 0 80px rgba(0,0,0,0.8);
-            display: grid;
-            grid-template-rows: 1fr auto;
-            gap: 30px;
-            position: relative;
+            
+            /* Motif Papier Millimétré */
+            background-image: 
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 40px 40px;
+            min-height: 100vh;
         }
 
-        /* Les vis de fixation du panneau */
-        .panel-screw {
-            position: absolute; width: 16px; height: 16px;
-            background: radial-gradient(circle, #555, #111);
-            border-radius: 50%;
-            box-shadow: 0 1px 0 rgba(255,255,255,0.1);
+        h1, h2, h3 {
+            font-family: 'Oswald', sans-serif; /* Titres style "Plan" */
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .panel-screw::after { content: "+"; color: #222; position: absolute; top: -3px; left: 3px; font-size: 16px; }
+
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+        ul { list-style: none; }
+
+        /* Le Cadre Principal (La "Feuille A0") */
+        .drawing-sheet {
+            max-width: 1100px;
+            margin: 0 auto;
+            border: var(--border-thick);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            position: relative;
+            box-shadow: 10px 10px 0px rgba(0, 86, 210, 0.1); /* Ombre dure décalée */
+        }
+
+        /* Croix de visée aux 4 coins (Déco technique) */
+        .crosshair {
+            position: absolute;
+            width: 20px; height: 20px;
+            border-right: 1px solid var(--blueprint-blue);
+            border-bottom: 1px solid var(--blueprint-blue);
+        }
+        .tl { top: 10px; left: 10px; border:none; border-left:1px solid var(--blueprint-blue); border-top:1px solid var(--blueprint-blue); }
+        .tr { top: 10px; right: 10px; border:none; border-right:1px solid var(--blueprint-blue); border-top:1px solid var(--blueprint-blue); }
+        .bl { bottom: 10px; left: 10px; border:none; border-left:1px solid var(--blueprint-blue); border-bottom:1px solid var(--blueprint-blue); }
+        .br { bottom: 10px; right: 10px; } /* Default style */
 
         /* =========================================
-           3. DU (DISPLAY UNITS) - ÉCRANS
+           3. LE CARTOUCHE (Header style Title Block)
         ========================================= */
-        .screens-container {
+        header {
+            border: var(--border-thick);
+            margin-bottom: 50px;
             display: grid;
-            grid-template-columns: 1fr 1fr; /* PFD (Gauche) / ND (Droite) */
-            gap: 40px;
-            height: 100%;
+            grid-template-columns: 3fr 1fr; /* Nom à gauche, Méta à droite */
         }
 
-        .display-unit {
-            background-color: var(--bezel-color);
-            border-radius: 12px;
-            padding: 25px; /* Cadre physique épais */
-            box-shadow: 
-                5px 5px 15px rgba(0,0,0,0.6),
-                inset 1px 1px 2px rgba(255,255,255,0.1);
+        .cartouche-main {
+            padding: 30px;
+            border-right: var(--border-thick);
+        }
+
+        .cartouche-meta {
             display: flex;
             flex-direction: column;
-            position: relative;
         }
 
-        .screen-glass {
-            background-color: var(--screen-black);
-            flex-grow: 1;
-            border: 2px solid #333;
-            border-radius: 4px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: inset 0 0 30px black;
+        .meta-box {
+            padding: 10px 15px;
+            border-bottom: var(--border-thin);
+            font-size: 0.75rem;
+            color: var(--technical-grey);
         }
+        .meta-box:last-child { border-bottom: none; flex-grow: 1; display:flex; align-items:center; justify-content:center; }
+        .meta-box strong { display: block; color: var(--blueprint-blue); font-size: 0.85rem; }
 
-        /* Reflet Anti-Reflet */
-        .screen-glass::after {
-            content: ""; position: absolute; inset: 0;
-            background: var(--glass-glare);
-            pointer-events: none; z-index: 10;
-        }
+        h1 { font-size: 3rem; margin: 0; line-height: 1; color: var(--ink-color); }
+        .subtitle { color: var(--blueprint-blue); font-weight: 500; font-size: 1.2rem; margin-top: 5px; }
+        .school { margin-top: 15px; font-size: 0.9rem; color: var(--technical-grey); }
 
-        /* Scanlines subtiles */
-        .screen-glass::before {
-            content: ""; position: absolute; inset: 0;
-            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.02) 3px);
-            pointer-events: none; z-index: 9;
+        /* Bouton CV style "Tampon" */
+        .btn-stamp {
+            display: inline-block;
+            border: 2px solid var(--ink-color);
+            padding: 8px 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.9rem;
         }
+        .btn-stamp:hover { background: var(--ink-color); color: #fff; }
 
         /* =========================================
-           4. ÉCRAN GAUCHE : PFD (Primary Flight Display)
-           Contenu : Identité, Bio
+           4. SPECIFICATIONS (Bio) & FORMATION
         ========================================= */
-        
-        /* FMA (Flight Mode Annunciator) - Haut de l'écran */
-        .fma-grid {
+        .grid-layout {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-            border-bottom: 2px solid var(--color-white);
-            height: 12%;
-            margin-bottom: 10px;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            margin-bottom: 60px;
         }
-        .fma-col {
-            border-right: 1px solid #444;
-            padding: 5px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-end;
+
+        .section-label {
             font-size: 0.8rem;
-            font-weight: bold;
-        }
-        .fma-col:last-child { border-right: none; }
-        
-        .mode-active { color: var(--color-green); }
-        .mode-armed { color: var(--color-cyan); }
-        .mode-box { border: 1px solid var(--color-white); padding: 0 4px; margin-top: 2px; }
-
-        /* Zone Centrale PFD */
-        .pfd-center {
-            position: relative;
-            height: 88%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* Horizon Artificiel (Arrière-plan) */
-        .horizon {
-            position: absolute; top: 15%; left: 15%; width: 70%; height: 60%;
-            background: linear-gradient(to bottom, var(--pfd-sky) 50%, var(--pfd-gnd) 50%);
-            border: 1px solid #666;
-            opacity: 0.4;
-            z-index: 0;
-        }
-        /* Ligne jaune (The Bird) */
-        .horizon::after {
-            content: ""; position: absolute; top: 50%; left: 20%; width: 60%; height: 2px;
-            background: #FFD700; box-shadow: 0 0 5px #FFD700;
-            transform: translateY(-50%);
-        }
-
-        /* Bandes Vitesse/Altitude */
-        .speed-tape {
-            position: absolute; left: 0; top: 15%; bottom: 15%; width: 12%;
-            background: rgba(20,20,20,0.8); border-right: 2px solid var(--color-white);
-            display: flex; flex-direction: column; justify-content: space-around; text-align: right; padding-right: 5px; color: var(--color-white); font-weight: bold; font-size: 0.9rem;
-        }
-        .alt-tape {
-            position: absolute; right: 0; top: 15%; bottom: 15%; width: 14%;
-            background: rgba(20,20,20,0.8); border-left: 2px solid var(--color-white);
-            display: flex; flex-direction: column; justify-content: space-around; text-align: left; padding-left: 5px; color: var(--color-green); font-weight: bold; font-size: 0.9rem;
-        }
-        .magenta-bug { color: var(--color-magenta); font-size: 0.7rem; }
-
-        /* TEXTE INFO (Par dessus l'horizon) */
-        .pilot-info-overlay {
-            z-index: 5;
-            text-align: center;
-            text-shadow: 1px 1px 0 #000;
-            background: rgba(0,0,0,0.6);
-            padding: 15px;
-            border: 1px solid var(--color-cyan);
-            max-width: 80%;
-        }
-        
-        .pilot-name { font-size: 1.8rem; color: var(--color-white); letter-spacing: 2px; margin-bottom: 5px; }
-        .pilot-role { font-size: 1rem; color: var(--color-cyan); margin-bottom: 15px; }
-        .pilot-bio { font-size: 0.85rem; color: var(--color-green); line-height: 1.4; text-align: left; }
-
-        /* Heading (Bas) */
-        .heading-tape {
-            position: absolute; bottom: 0; left: 20%; width: 60%; height: 30px;
-            border-top: 2px solid var(--color-white);
-            display: flex; justify-content: center; align-items: center;
-            color: var(--color-white); font-size: 1.2rem;
-        }
-
-        /* =========================================
-           5. ÉCRAN DROIT : ECAM (System Display)
-           Haut: Projets / Bas: Stages
-        ========================================= */
-        .ecam-grid {
-            display: grid;
-            grid-template-rows: 1fr 1fr; /* 50% Haut / 50% Bas */
-            height: 100%;
-        }
-
-        /* UPPER ECAM : PROJETS (Engine params style) */
-        .upper-ecam {
-            border-bottom: 2px solid var(--color-white);
-            padding: 20px;
-            overflow-y: auto;
-        }
-        .screen-title { color: var(--color-white); text-decoration: underline; margin-bottom: 15px; display: block; font-size: 0.9rem; }
-
-        .project-row {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 12px;
-            cursor: pointer;
-            padding: 5px;
-        }
-        .project-row:hover { background: rgba(255,255,255,0.1); }
-        
-        .gauge-label { color: var(--color-white); font-size: 0.9rem; flex: 1; }
-        .gauge-bar-container { flex: 2; height: 10px; background: #333; margin: 0 10px; position: relative; }
-        .gauge-bar-fill { height: 100%; background: var(--color-green); }
-        .gauge-val { color: var(--color-cyan); width: 40px; text-align: right; font-size: 0.9rem; }
-
-        /* LOWER ECAM : STAGES (System Log style) */
-        .lower-ecam {
-            padding: 20px;
-            overflow-y: auto;
-        }
-        .log-entry {
-            display: grid;
-            grid-template-columns: 80px 1fr;
-            margin-bottom: 15px;
-            border-bottom: 1px dashed #333;
+            color: var(--blueprint-blue);
+            border-bottom: 1px solid var(--blueprint-blue);
             padding-bottom: 5px;
-        }
-        .log-date { color: var(--color-cyan); font-size: 0.8rem; }
-        .log-details { display: flex; flex-direction: column; }
-        .log-company { color: var(--color-white); font-weight: bold; font-size: 0.95rem; }
-        .log-role { color: var(--color-green); font-size: 0.85rem; }
-
-        /* =========================================
-           6. FOOTER (MCDU / CONTROLS)
-        ========================================= */
-        .control-panel {
-            background: #222;
-            border-top: 2px solid #111;
-            padding: 15px;
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            align-items: center;
+            margin-bottom: 20px;
+            display: inline-block;
+            width: 100%;
         }
 
-        .master-warn-btn {
-            background: #600; color: #aaa;
-            border: 4px solid #400;
-            width: 80px; height: 60px;
-            display: flex; justify-content: center; align-items: center; text-align: center;
-            font-weight: bold; font-size: 0.8rem;
-            box-shadow: 0 5px 10px black;
-            cursor: pointer;
-            animation: warning-flash 0.8s infinite;
-        }
-        @keyframes warning-flash { 50% { background: #FF0000; color: white; box-shadow: 0 0 20px #FF0000; border-color: #aa0000; } }
+        /* Bio */
+        .bio-text { font-size: 1rem; color: #444; text-align: justify; }
 
-        .fcu-knob {
-            width: 60px; height: 60px;
-            border-radius: 50%;
-            background: conic-gradient(#333 0deg, #111 90deg, #333 180deg, #111 270deg);
-            border: 2px solid #555;
-            box-shadow: 0 5px 10px black;
+        /* Timeline Technique */
+        .tech-timeline { position: relative; border-left: 1px solid var(--grid-line); padding-left: 20px; }
+        
+        .timeline-node {
             position: relative;
+            margin-bottom: 30px;
         }
-        .fcu-knob::after { content: ""; position: absolute; top: 5px; left: 28px; width: 4px; height: 25px; background: white; }
+        .timeline-node::before {
+            content: ''; position: absolute; left: -25px; top: 5px;
+            width: 9px; height: 9px; background: var(--bg-paper);
+            border: 2px solid var(--blueprint-blue); border-radius: 50%;
+        }
 
-        .action-buttons { display: flex; gap: 15px; }
-        .push-btn {
-            background: #151515; color: #ddd;
-            border: 1px solid #444; border-bottom: 4px solid black;
-            padding: 12px 25px;
-            font-family: 'B612 Mono', monospace; font-size: 0.9rem;
-            cursor: pointer; text-transform: uppercase;
+        .date-tag {
+            background: var(--blueprint-blue); color: white;
+            padding: 2px 6px; font-size: 0.7rem; font-weight: bold;
+            display: inline-block; margin-bottom: 5px;
         }
-        .push-btn:active { border-bottom: 1px solid black; transform: translateY(3px); }
+        .node-title { font-weight: 700; font-size: 1rem; }
+        .node-desc { font-size: 0.85rem; color: var(--technical-grey); margin-top: 5px; }
 
         /* =========================================
-           7. MODALES (CHECKLIST)
+           5. PROJETS (Component View)
+        ========================================= */
+        .projects-section { margin-top: 20px; }
+        
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        /* Carte Projet style "Plan de pièce" */
+        .blueprint-card {
+            border: var(--border-thin);
+            background: #fff;
+            padding: 20px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        /* Les coins techniques de la carte */
+        .blueprint-card::after {
+            content: ''; position: absolute; bottom: 0; right: 0;
+            width: 0; height: 0;
+            border-style: solid; border-width: 0 0 20px 20px;
+            border-color: transparent transparent var(--blueprint-blue) transparent;
+            transition: all 0.3s;
+        }
+
+        .blueprint-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 10px 10px 0 rgba(0,0,0,0.05);
+            border-color: var(--blueprint-blue);
+        }
+
+        .card-header-line {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px dashed var(--grid-line);
+            padding-bottom: 10px; margin-bottom: 15px;
+        }
+        .project-ref { font-size: 0.7rem; color: var(--technical-grey); }
+        .project-year { font-weight: bold; font-size: 0.8rem; }
+
+        .card-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: var(--ink-color);
+        }
+
+        .dim-lines {
+            display: flex; gap: 10px; margin-top: 20px; font-size: 0.75rem;
+            color: var(--blueprint-blue);
+        }
+        .dim-tag { border: 1px solid var(--blueprint-blue); padding: 2px 8px; }
+
+        /* =========================================
+           6. MODALES (Style Feuille de Spécification)
         ========================================= */
         dialog {
-            inset: 0; margin: auto;
-            background: #101010;
-            border: 2px solid var(--color-cyan);
-            color: var(--color-white);
-            width: 600px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.9);
-            font-family: 'B612 Mono';
+            width: 100%; max-width: 900px;
+            border: var(--border-thick);
+            padding: 0;
+            background: #fff;
+            inset: 0;
+            margin: auto;
+            box-shadow: 20px 20px 0 rgba(0,0,0,0.1);
         }
-        dialog::backdrop { background: rgba(0,0,0,0.7); backdrop-filter: blur(2px); }
-        
-        .modal-header { background: var(--color-cyan); color: black; padding: 10px; font-weight: bold; display: flex; justify-content: space-between;}
-        .modal-body { padding: 30px; }
-        .checklist-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #333; padding: 10px 0; }
-        .cl-val { color: var(--color-green); }
+        dialog::backdrop { background: rgba(255, 255, 255, 0.8); }
 
-        @media (max-width: 1024px) {
-            .screens-container { grid-template-columns: 1fr; }
-            .display-unit:last-child { display: none; /* Cache l'écran droit sur mobile pour focus PFD */ }
+        .modal-header {
+            background: var(--blueprint-blue);
+            color: white;
+            padding: 15px 30px;
+            display: flex; justify-content: space-between; align-items: center;
         }
+        .close-btn {
+            background: transparent; border: 1px solid white; color: white;
+            padding: 5px 12px; cursor: pointer; text-transform: uppercase; font-size: 0.8rem;
+        }
+        .close-btn:hover { background: white; color: var(--blueprint-blue); }
+
+        .modal-content { padding: 40px; }
+
+        /* Liste Projets dans Modale */
+        .spec-sheet {
+            display: grid; grid-template-columns: 1fr; gap: 40px;
+        }
+        
+        .project-detail-row {
+            display: grid; grid-template-columns: 1fr 2fr; gap: 30px;
+            border-bottom: 1px solid var(--grid-line); padding-bottom: 30px;
+        }
+
+        .detail-meta h4 { font-family: 'Oswald'; font-size: 1.5rem; margin-bottom: 10px; }
+        .detail-meta ul { font-size: 0.85rem; color: var(--technical-grey); }
+        .detail-desc { font-size: 0.95rem; line-height: 1.6; }
+        
+        .btn-pdf {
+            display: inline-block; margin-top: 15px;
+            background: var(--ink-color); color: white;
+            padding: 10px 20px; font-size: 0.8rem;
+        }
+        .btn-pdf:hover { background: var(--blueprint-blue); }
+
+        /* Footer */
+        footer {
+            margin-top: 60px;
+            border-top: var(--border-thick);
+            padding-top: 20px;
+            display: flex; justify-content: space-between;
+            font-size: 0.75rem; color: var(--technical-grey);
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .drawing-sheet { padding: 20px; }
+            header { grid-template-columns: 1fr; border-bottom: none; }
+            .cartouche-main { border-right: none; border-bottom: var(--border-thick); }
+            .grid-layout { grid-template-columns: 1fr; }
+            .project-detail-row { grid-template-columns: 1fr; }
+        }
+
     </style>
 </head>
 <body>
 
-    <main class="main-panel">
-        <div class="panel-screw" style="top: 10px; left: 10px;"></div>
-        <div class="panel-screw" style="top: 10px; right: 10px;"></div>
+    <main class="drawing-sheet">
+        <div class="crosshair tl"></div>
+        <div class="crosshair tr"></div>
+        <div class="crosshair bl"></div>
+        <div class="crosshair br"></div>
 
-        <div class="screens-container">
+        <header>
+            <div class="cartouche-main">
+                <h1>{{NOM}} {{PRENOM}}</h1>
+                <p class="subtitle">{{TITRE_PROFIL}}</p>
+                <p class="school">{{ECOLE_ACTUELLE}}</p>
+            </div>
+            <div class="cartouche-meta">
+                <div class="meta-box"><strong>ÉCHELLE</strong>1:1</div>
+                <div class="meta-box"><strong>DATE</strong>2024-2025</div>
+                <div class="meta-box"><strong>TYPE</strong>PORTFOLIO</div>
+                <div class="meta-box">
+                    <a href="#" class="btn-stamp">VOIR CV (PDF)</a>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid-layout">
             
-            <div class="display-unit">
-                <div class="screen-glass">
-                    
-                    <div class="fma-grid">
-                        <div class="fma-col"><span class="mode-active">SPD</span></div> <div class="fma-col"><span class="mode-active">NAV</span><span class="mode-armed" style="font-size:0.7rem;">CAT 3</span></div> <div class="fma-col"></div> <div class="fma-col"><span class="mode-active">ALT</span><span class="mode-magenta">FL390</span></div> <div class="fma-col"><span class="mode-box mode-active">AP1+2</span></div> </div>
+            <section id="specs">
+                <span class="section-label">01. SPÉCIFICATIONS TECHNIQUES (BIO)</span>
+                <p class="bio-text">
+                    {{DESCRIPTION_PROFIL}}
+                </p>
+                
+                <div style="margin-top: 30px;">
+                    <span class="section-label" style="width: auto;">CONTACT</span>
+                    <ul style="font-size: 0.9rem;">
+                        <li>// MAIL : <a href="mailto:{{EMAIL}}" style="text-decoration: underline;">{{EMAIL}}</a></li>
+                        <li>// LINKEDIN : <a href="{{LINKEDIN_URL}}" target="_blank" style="text-decoration: underline;">Profil</a></li>
+                    </ul>
+                </div>
+            </section>
 
-                    <div class="pfd-center">
-                        <div class="horizon"></div>
-                        
-                        <div class="speed-tape">
-                            <span class="magenta-bug">V2</span>
-                            <span>320</span>
-                            <span style="color:var(--color-green); font-size: 1.1rem; border:1px solid white;">300</span>
-                            <span>280</span>
-                            <span>260</span>
-                        </div>
-
-                        <div class="alt-tape">
-                            <span class="magenta-bug">FL390</span>
-                            <span>35000</span>
-                            <span style="color:var(--color-green); font-size: 1.1rem; border:1px solid white;">34500</span>
-                            <span>34000</span>
-                            <span>GROUND</span>
-                        </div>
-
-                        <div class="pilot-info-overlay">
-                            <div class="pilot-name">{{NOM}}</div>
-                            <div class="pilot-role">{{TITRE_PROFIL}}</div>
-                            <div class="pilot-bio">
-                                >> {{DESCRIPTION_PROFIL}}
-                            </div>
-                        </div>
-
-                        <div class="heading-tape">
-                            <span>270</span> ... <span>280</span> ... <span style="color:var(--color-green);">285</span> ... <span>290</span>
+            <section id="assembly">
+                <span class="section-label">02. PROCESSUS D'ASSEMBLAGE (FORMATION)</span>
+                
+                <div class="tech-timeline">
+                    <div class="timeline-node">
+                        <span class="date-tag">2023 - 2025</span>
+                        <div class="node-title">Master Ingénierie Mécanique</div>
+                        <div class="node-desc">
+                            INSA Lyon<br>
+                            <em>Spécialité : Conception de systèmes & Matériaux</em>
                         </div>
                     </div>
-
-                </div>
-                <div style="color:#555; text-align:center; font-size:0.7rem; margin-top:5px;">PFD - CAPT SIDE</div>
-            </div>
-
-            <div class="display-unit">
-                <div class="screen-glass">
-                    <div class="ecam-grid">
-                        
-                        <div class="upper-ecam">
-                            <span class="screen-title">E/WD : ACTIVE PROJECTS</span>
-                            
-                            <div class="project-row" onclick="openModal('modal-projects')">
-                                <span class="gauge-label">DRONE DESIGN</span>
-                                <div class="gauge-bar-container"><div class="gauge-bar-fill" style="width: 100%;"></div></div>
-                                <span class="gauge-val">98%</span>
-                            </div>
-
-                            <div class="project-row" onclick="openModal('modal-projects')">
-                                <span class="gauge-label">PROPULSION</span>
-                                <div class="gauge-bar-container"><div class="gauge-bar-fill" style="width: 75%;"></div></div>
-                                <span class="gauge-val">75%</span>
-                            </div>
-
-                            <div class="project-row" onclick="openModal('modal-others')">
-                                <span class="gauge-label">{{TITRE_AUTRE_CATEGORIE}}</span>
-                                <div class="gauge-bar-container"><div class="gauge-bar-fill" style="width: 40%; background: var(--color-amber);"></div></div>
-                                <span class="gauge-val" style="color: var(--color-amber);">IDLE</span>
-                            </div>
-
-                            <div style="margin-top: 20px; color: var(--color-amber); font-size: 0.8rem;">
-                                T.O. INHIBIT <br> NO BLUE
-                            </div>
+                    <div class="timeline-node">
+                        <span class="date-tag">2020 - 2023</span>
+                        <div class="node-title">CPGE (MPSI / PSI)</div>
+                        <div class="node-desc">
+                            Lycée Pierre de Fermat<br>
+                            <em>Classe préparatoire aux grandes écoles</em>
                         </div>
-
-                        <div class="lower-ecam">
-                            <span class="screen-title">SD : FLIGHT HISTORY (STAGES)</span>
-                            
-                            <div class="log-entry">
-                                <span class="log-date">2024</span>
-                                <div class="log-details">
-                                    <span class="log-company">AIRBUS ATLANTIC</span>
-                                    <span class="log-role">Stage Ingénieur Méthodes (6 mois)</span>
-                                </div>
-                            </div>
-
-                            <div class="log-entry">
-                                <span class="log-date">2023</span>
-                                <div class="log-details">
-                                    <span class="log-company">SAFRAN</span>
-                                    <span class="log-role">Assistant R&D - Matériaux Composites</span>
-                                </div>
-                            </div>
-
-                             <div class="log-entry" style="border:none;">
-                                <span class="log-date">2022</span>
-                                <div class="log-details">
-                                    <span class="log-company">THALES</span>
-                                    <span class="log-role">Découverte Avionique</span>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
-                <div style="color:#555; text-align:center; font-size:0.7rem; margin-top:5px;">ECAM - SYS DISPLAY</div>
-            </div>
-
+            </section>
         </div>
 
-        <div class="control-panel">
-            <div class="master-warn-btn" onclick="alert('CAUTION: HIRING IMMINENT')">MASTER<br>WARN</div>
+        <section class="projects-section">
+            <span class="section-label">03. VUES ÉCLATÉES (PROJETS)</span>
             
-            <div style="text-align:center;">
-                <div class="fcu-knob"></div>
-                <div style="font-size:0.6rem; color:#888; margin-top:5px;">SPD/MACH</div>
-            </div>
-            
-            <div class="action-buttons">
-                <button class="push-btn" onclick="window.location.href='mailto:{{EMAIL}}'">VHF 1 (EMAIL)</button>
-                <button class="push-btn" onclick="window.open('{{LINKEDIN_URL}}')">ACARS (LINKEDIN)</button>
-                <button class="push-btn" onclick="window.location.href='mentions.html'">LEGAL</button>
-            </div>
+            <div class="projects-grid">
+                
+                <article class="blueprint-card" onclick="openModal('modal-projects')">
+                    <div class="card-header-line">
+                        <span class="project-ref">REF-001</span>
+                        <span class="project-year">2024</span>
+                    </div>
+                    <h3 class="card-title">PROJETS ACADÉMIQUES</h3>
+                    <p style="font-size: 0.9rem; color: #555;">
+                        Conception mécanique, simulations par éléments finis et études de cas.
+                    </p>
+                    <div class="dim-lines">
+                        <span class="dim-tag">CATIA V5</span>
+                        <span class="dim-tag">ANSYS</span>
+                    </div>
+                </article>
 
-            <div style="text-align:center;">
-                <div class="fcu-knob"></div>
-                <div style="font-size:0.6rem; color:#888; margin-top:5px;">ALT</div>
+                <article class="blueprint-card" onclick="openModal('modal-others')">
+                    <div class="card-header-line">
+                        <span class="project-ref">REF-002</span>
+                        <span class="project-year">2023-24</span>
+                    </div>
+                    <h3 class="card-title">{{TITRE_AUTRE_CATEGORIE}}</h3>
+                    <p style="font-size: 0.9rem; color: #555;">
+                        Travaux pratiques, projets personnels et expériences annexes.
+                    </p>
+                    <div class="dim-lines">
+                        <span class="dim-tag">LABO</span>
+                        <span class="dim-tag">PERSO</span>
+                    </div>
+                </article>
+
             </div>
-        </div>
+        </section>
+
+        <footer>
+            <div>APPROUVÉ PAR : {{NOM}}</div>
+            <div><a href="mentions.html">MENTIONS LÉGALES</a></div>
+            <div>STATUS: FABRICATION TERMINÉE</div>
+        </footer>
 
     </main>
 
+
     <dialog id="modal-projects">
         <div class="modal-header">
-            <span>ECAM ACTION : DRONE PROJECT</span>
-            <span style="cursor: pointer;" onclick="document.getElementById('modal-projects').close()">[ CLR ]</span>
+            <span>DOSSIER TECHNIQUE : PROJETS</span>
+            <button class="close-btn" onclick="closeModal('modal-projects')">FERMER [X]</button>
         </div>
-        <div class="modal-body">
-            <div class="checklist-row">
-                <span>YEAR</span> <span class="cl-val">2024</span>
+        <div class="modal-content">
+            <div class="spec-sheet">
+                
+                <div class="project-detail-row">
+                    <div class="detail-meta">
+                        <h4>Moteur Hybride</h4>
+                        <ul>
+                            <li><strong>ANNÉE :</strong> 2024</li>
+                            <li><strong>OUTILS :</strong> SolidWorks, Matlab</li>
+                        </ul>
+                    </div>
+                    <div class="detail-desc">
+                        <p>Étude thermodynamique et conception 3D d'un système de motorisation hybride pour drone longue portée. Simulation des flux thermiques et optimisation de la masse structurelle.</p>
+                        <a href="#" class="btn-pdf">VOIR LE PLAN (PDF)</a>
+                    </div>
+                </div>
+
+                <div class="project-detail-row">
+                    <div class="detail-meta">
+                        <h4>Pont Suspendu (Maquette)</h4>
+                        <ul>
+                            <li><strong>ANNÉE :</strong> 2023</li>
+                            <li><strong>OUTILS :</strong> AutoCAD</li>
+                        </ul>
+                    </div>
+                    <div class="detail-desc">
+                        <p>Calcul de résistance des matériaux (RDM) et réalisation d'une maquette à l'échelle 1:50 pour tester la résistance aux vents latéraux.</p>
+                        <a href="#" class="btn-pdf">VOIR LE PLAN (PDF)</a>
+                    </div>
+                </div>
+
             </div>
-            <div class="checklist-row">
-                <span>STATUS</span> <span class="cl-val" style="color:var(--color-green);">COMPLETED</span>
-            </div>
-            <p style="margin-top:20px; line-height:1.6; color:#ccc;">
-                Conception complète d'un drone tactique. Simulation des contraintes aérodynamiques sous ANSYS Fluent.
-            </p>
-            <button class="push-btn" style="width:100%; margin-top:20px; border-bottom:2px solid #333;">DOWNLOAD TECH SPECS (PDF)</button>
         </div>
     </dialog>
 
     <dialog id="modal-others">
         <div class="modal-header">
-            <span>ECAM ACTION : OTHER LOGS</span>
-            <span style="cursor: pointer;" onclick="document.getElementById('modal-others').close()">[ CLR ]</span>
+            <span>DOSSIER ANNEXE : {{TITRE_AUTRE_CATEGORIE}}</span>
+            <button class="close-btn" onclick="closeModal('modal-others')">FERMER [X]</button>
         </div>
-        <div class="modal-body">
-            <p>Données secondaires...</p>
+        <div class="modal-content">
+            <p>Contenu de la catégorie secondaire...</p>
         </div>
     </dialog>
+
+    <script>
+        function openModal(id) {
+            document.getElementById(id).showModal();
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal(id) {
+            document.getElementById(id).close();
+            document.body.style.overflow = '';
+        }
+        document.querySelectorAll('dialog').forEach(d => {
+            d.addEventListener('click', e => {
+                if (e.target === d) {
+                    d.close();
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>
