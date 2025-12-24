@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITRE_DU_SITE}}</title>
+    <meta name="description" content="Portfolio Technique & Ingénierie">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================================
+           1. VARIABLES (Thème "Plan Technique")
+        ========================================= */
+        :root {
+            --bg-paper: #F7F9FC;       /* Blanc cassé / Papier technique */
+            --grid-line: #E1E6EB;      /* Ligne de grille très légère */
+            --ink-color: #1A202C;      /* Noir texte principal */
+            --blueprint-blue: #0056D2; /* Bleu Ingénieur (Traits, Cadres) */
+            --technical-grey: #718096; /* Gris pour les métadonnées */
+            --alert-red: #E53E3E;      /* Pour les interactions importantes */
+            
+            --border-thick: 2px solid var(--blueprint-blue);
+            --border-thin: 1px solid var(--blueprint-blue);
+        }
+
+        /* =========================================
+           2. RESET & BASE (Papier Millimétré)
+        ========================================= */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-paper);
+            color: var(--ink-color);
+            font-family: 'Roboto Mono', monospace; /* Tout en mono par défaut */
+            line-height: 1.5;
+            padding: 40px;
+            
+            /* Motif Papier Millimétré */
+            background-image: 
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 40px 40px;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Oswald', sans-serif; /* Titres style "Plan" */
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+        ul { list-style: none; }
+
+        /* Le Cadre Principal (La "Feuille A0") */
+        .drawing-sheet {
+            max-width: 1100px;
+            margin: 0 auto;
+            border: var(--border-thick);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            position: relative;
+            box-shadow: 10px 10px 0px rgba(0, 86, 210, 0.1); /* Ombre dure décalée */
+        }
+
+        /* Croix de visée aux 4 coins (Déco technique) */
+        .crosshair {
+            position: absolute;
+            width: 20px; height: 20px;
+            border-right: 1px solid var(--blueprint-blue);
+            border-bottom: 1px solid var(--blueprint-blue);
+        }
+        .tl { top: 10px; left: 10px; border:none; border-left:1px solid var(--blueprint-blue); border-top:1px solid var(--blueprint-blue); }
+        .tr { top: 10px; right: 10px; border:none; border-right:1px solid var(--blueprint-blue); border-top:1px solid var(--blueprint-blue); }
+        .bl { bottom: 10px; left: 10px; border:none; border-left:1px solid var(--blueprint-blue); border-bottom:1px solid var(--blueprint-blue); }
+        .br { bottom: 10px; right: 10px; } /* Default style */
+
+        /* =========================================
+           3. LE CARTOUCHE (Header style Title Block)
+        ========================================= */
+        header {
+            border: var(--border-thick);
+            margin-bottom: 50px;
+            display: grid;
+            grid-template-columns: 3fr 1fr; /* Nom à gauche, Méta à droite */
+        }
+
+        .cartouche-main {
+            padding: 30px;
+            border-right: var(--border-thick);
+        }
+
+        .cartouche-meta {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .meta-box {
+            padding: 10px 15px;
+            border-bottom: var(--border-thin);
+            font-size: 0.75rem;
+            color: var(--technical-grey);
+        }
+        .meta-box:last-child { border-bottom: none; flex-grow: 1; display:flex; align-items:center; justify-content:center; }
+        .meta-box strong { display: block; color: var(--blueprint-blue); font-size: 0.85rem; }
+
+        h1 { font-size: 3rem; margin: 0; line-height: 1; color: var(--ink-color); }
+        .subtitle { color: var(--blueprint-blue); font-weight: 500; font-size: 1.2rem; margin-top: 5px; }
+        .school { margin-top: 15px; font-size: 0.9rem; color: var(--technical-grey); }
+
+        /* Bouton CV style "Tampon" */
+        .btn-stamp {
+            display: inline-block;
+            border: 2px solid var(--ink-color);
+            padding: 8px 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.9rem;
+        }
+        .btn-stamp:hover { background: var(--ink-color); color: #fff; }
+
+        /* =========================================
+           4. SPECIFICATIONS (Bio) & FORMATION
+        ========================================= */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            margin-bottom: 60px;
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            color: var(--blueprint-blue);
+            border-bottom: 1px solid var(--blueprint-blue);
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+            display: inline-block;
+            width: 100%;
+        }
+
+        /* Bio */
+        .bio-text { font-size: 1rem; color: #444; text-align: justify; }
+
+        /* Timeline Technique */
+        .tech-timeline { position: relative; border-left: 1px solid var(--grid-line); padding-left: 20px; }
+        
+        .timeline-node {
+            position: relative;
+            margin-bottom: 30px;
+        }
+        .timeline-node::before {
+            content: ''; position: absolute; left: -25px; top: 5px;
+            width: 9px; height: 9px; background: var(--bg-paper);
+            border: 2px solid var(--blueprint-blue); border-radius: 50%;
+        }
+
+        .date-tag {
+            background: var(--blueprint-blue); color: white;
+            padding: 2px 6px; font-size: 0.7rem; font-weight: bold;
+            display: inline-block; margin-bottom: 5px;
+        }
+        .node-title { font-weight: 700; font-size: 1rem; }
+        .node-desc { font-size: 0.85rem; color: var(--technical-grey); margin-top: 5px; }
+
+        /* =========================================
+           5. PROJETS (Component View)
+        ========================================= */
+        .projects-section { margin-top: 20px; }
+        
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        /* Carte Projet style "Plan de pièce" */
+        .blueprint-card {
+            border: var(--border-thin);
+            background: #fff;
+            padding: 20px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        /* Les coins techniques de la carte */
+        .blueprint-card::after {
+            content: ''; position: absolute; bottom: 0; right: 0;
+            width: 0; height: 0;
+            border-style: solid; border-width: 0 0 20px 20px;
+            border-color: transparent transparent var(--blueprint-blue) transparent;
+            transition: all 0.3s;
+        }
+
+        .blueprint-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 10px 10px 0 rgba(0,0,0,0.05);
+            border-color: var(--blueprint-blue);
+        }
+
+        .card-header-line {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px dashed var(--grid-line);
+            padding-bottom: 10px; margin-bottom: 15px;
+        }
+        .project-ref { font-size: 0.7rem; color: var(--technical-grey); }
+        .project-year { font-weight: bold; font-size: 0.8rem; }
+
+        .card-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: var(--ink-color);
+        }
+
+        .dim-lines {
+            display: flex; gap: 10px; margin-top: 20px; font-size: 0.75rem;
+            color: var(--blueprint-blue);
+        }
+        .dim-tag { border: 1px solid var(--blueprint-blue); padding: 2px 8px; }
+
+        /* =========================================
+           6. MODALES (Style Feuille de Spécification)
+        ========================================= */
+        dialog {
+            width: 100%; max-width: 900px;
+            border: var(--border-thick);
+            padding: 0;
+            background: #fff;
+            box-shadow: 20px 20px 0 rgba(0,0,0,0.1);
+        }
+        dialog::backdrop { background: rgba(255, 255, 255, 0.8); }
+
+        .modal-header {
+            background: var(--blueprint-blue);
+            color: white;
+            padding: 15px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .close-btn {
+            background: transparent; border: 1px solid white; color: white;
+            padding: 5px 12px; cursor: pointer; text-transform: uppercase; font-size: 0.8rem;
+        }
+        .close-btn:hover { background: white; color: var(--blueprint-blue); }
+
+        .modal-content { padding: 40px; }
+
+        /* Liste Projets dans Modale */
+        .spec-sheet {
+            display: grid; grid-template-columns: 1fr; gap: 40px;
+        }
+        
+        .project-detail-row {
+            display: grid; grid-template-columns: 1fr 2fr; gap: 30px;
+            border-bottom: 1px solid var(--grid-line); padding-bottom: 30px;
+        }
+
+        .detail-meta h4 { font-family: 'Oswald'; font-size: 1.5rem; margin-bottom: 10px; }
+        .detail-meta ul { font-size: 0.85rem; color: var(--technical-grey); }
+        .detail-desc { font-size: 0.95rem; line-height: 1.6; }
+        
+        .btn-pdf {
+            display: inline-block; margin-top: 15px;
+            background: var(--ink-color); color: white;
+            padding: 10px 20px; font-size: 0.8rem;
+        }
+        .btn-pdf:hover { background: var(--blueprint-blue); }
+
+        /* Footer */
+        footer {
+            margin-top: 60px;
+            border-top: var(--border-thick);
+            padding-top: 20px;
+            display: flex; justify-content: space-between;
+            font-size: 0.75rem; color: var(--technical-grey);
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .drawing-sheet { padding: 20px; }
+            header { grid-template-columns: 1fr; border-bottom: none; }
+            .cartouche-main { border-right: none; border-bottom: var(--border-thick); }
+            .grid-layout { grid-template-columns: 1fr; }
+            .project-detail-row { grid-template-columns: 1fr; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <main class="drawing-sheet">
+        <div class="crosshair tl"></div>
+        <div class="crosshair tr"></div>
+        <div class="crosshair bl"></div>
+        <div class="crosshair br"></div>
+
+        <header>
+            <div class="cartouche-main">
+                <h1>{{NOM}} {{PRENOM}}</h1>
+                <p class="subtitle">{{TITRE_PROFIL}}</p>
+                <p class="school">{{ECOLE_ACTUELLE}}</p>
+            </div>
+            <div class="cartouche-meta">
+                <div class="meta-box"><strong>ÉCHELLE</strong>1:1</div>
+                <div class="meta-box"><strong>DATE</strong>2024-2025</div>
+                <div class="meta-box"><strong>TYPE</strong>PORTFOLIO</div>
+                <div class="meta-box">
+                    <a href="#" class="btn-stamp">VOIR CV (PDF)</a>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid-layout">
+            
+            <section id="specs">
+                <span class="section-label">01. SPÉCIFICATIONS TECHNIQUES (BIO)</span>
+                <p class="bio-text">
+                    {{DESCRIPTION_PROFIL}}
+                </p>
+                
+                <div style="margin-top: 30px;">
+                    <span class="section-label" style="width: auto;">CONTACT</span>
+                    <ul style="font-size: 0.9rem;">
+                        <li>// MAIL : <a href="mailto:{{EMAIL}}" style="text-decoration: underline;">{{EMAIL}}</a></li>
+                        <li>// LINKEDIN : <a href="{{LINKEDIN_URL}}" target="_blank" style="text-decoration: underline;">Profil</a></li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="assembly">
+                <span class="section-label">02. PROCESSUS D'ASSEMBLAGE (FORMATION)</span>
+                
+                <div class="tech-timeline">
+                    <div class="timeline-node">
+                        <span class="date-tag">2023 - 2025</span>
+                        <div class="node-title">Master Ingénierie Mécanique</div>
+                        <div class="node-desc">
+                            INSA Lyon<br>
+                            <em>Spécialité : Conception de systèmes & Matériaux</em>
+                        </div>
+                    </div>
+                    <div class="timeline-node">
+                        <span class="date-tag">2020 - 2023</span>
+                        <div class="node-title">CPGE (MPSI / PSI)</div>
+                        <div class="node-desc">
+                            Lycée Pierre de Fermat<br>
+                            <em>Classe préparatoire aux grandes écoles</em>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <section class="projects-section">
+            <span class="section-label">03. VUES ÉCLATÉES (PROJETS)</span>
+            
+            <div class="projects-grid">
+                
+                <article class="blueprint-card" onclick="openModal('modal-projects')">
+                    <div class="card-header-line">
+                        <span class="project-ref">REF-001</span>
+                        <span class="project-year">2024</span>
+                    </div>
+                    <h3 class="card-title">PROJETS ACADÉMIQUES</h3>
+                    <p style="font-size: 0.9rem; color: #555;">
+                        Conception mécanique, simulations par éléments finis et études de cas.
+                    </p>
+                    <div class="dim-lines">
+                        <span class="dim-tag">CATIA V5</span>
+                        <span class="dim-tag">ANSYS</span>
+                    </div>
+                </article>
+
+                <article class="blueprint-card" onclick="openModal('modal-others')">
+                    <div class="card-header-line">
+                        <span class="project-ref">REF-002</span>
+                        <span class="project-year">2023-24</span>
+                    </div>
+                    <h3 class="card-title">{{TITRE_AUTRE_CATEGORIE}}</h3>
+                    <p style="font-size: 0.9rem; color: #555;">
+                        Travaux pratiques, projets personnels et expériences annexes.
+                    </p>
+                    <div class="dim-lines">
+                        <span class="dim-tag">LABO</span>
+                        <span class="dim-tag">PERSO</span>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <footer>
+            <div>APPROUVÉ PAR : {{NOM}}</div>
+            <div><a href="mentions.html">MENTIONS LÉGALES</a></div>
+            <div>STATUS: FABRICATION TERMINÉE</div>
+        </footer>
+
+    </main>
+
+
+    <dialog id="modal-projects">
+        <div class="modal-header">
+            <span>DOSSIER TECHNIQUE : PROJETS</span>
+            <button class="close-btn" onclick="closeModal('modal-projects')">FERMER [X]</button>
+        </div>
+        <div class="modal-content">
+            <div class="spec-sheet">
+                
+                <div class="project-detail-row">
+                    <div class="detail-meta">
+                        <h4>Moteur Hybride</h4>
+                        <ul>
+                            <li><strong>ANNÉE :</strong> 2024</li>
+                            <li><strong>OUTILS :</strong> SolidWorks, Matlab</li>
+                        </ul>
+                    </div>
+                    <div class="detail-desc">
+                        <p>Étude thermodynamique et conception 3D d'un système de motorisation hybride pour drone longue portée. Simulation des flux thermiques et optimisation de la masse structurelle.</p>
+                        <a href="#" class="btn-pdf">VOIR LE PLAN (PDF)</a>
+                    </div>
+                </div>
+
+                <div class="project-detail-row">
+                    <div class="detail-meta">
+                        <h4>Pont Suspendu (Maquette)</h4>
+                        <ul>
+                            <li><strong>ANNÉE :</strong> 2023</li>
+                            <li><strong>OUTILS :</strong> AutoCAD</li>
+                        </ul>
+                    </div>
+                    <div class="detail-desc">
+                        <p>Calcul de résistance des matériaux (RDM) et réalisation d'une maquette à l'échelle 1:50 pour tester la résistance aux vents latéraux.</p>
+                        <a href="#" class="btn-pdf">VOIR LE PLAN (PDF)</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </dialog>
+
+    <dialog id="modal-others">
+        <div class="modal-header">
+            <span>DOSSIER ANNEXE : {{TITRE_AUTRE_CATEGORIE}}</span>
+            <button class="close-btn" onclick="closeModal('modal-others')">FERMER [X]</button>
+        </div>
+        <div class="modal-content">
+            <p>Contenu de la catégorie secondaire...</p>
+        </div>
+    </dialog>
+
+    <script>
+        function openModal(id) {
+            document.getElementById(id).showModal();
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal(id) {
+            document.getElementById(id).close();
+            document.body.style.overflow = '';
+        }
+        document.querySelectorAll('dialog').forEach(d => {
+            d.addEventListener('click', e => {
+                if (e.target === d) {
+                    d.close();
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
